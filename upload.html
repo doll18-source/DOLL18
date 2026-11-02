@@ -3,6 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0d0d0d">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="DOLL18">
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="robots" content="noindex, nofollow">
     <title>Doll18 - Upload Video</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -74,18 +82,37 @@
         </form>
 
         <div class="box" id="publish-box">
-            <strong>Langkah publish ke GitHub:</strong>
-            <ol>
-                <li>Download <code>videos.json</code> terbaru lalu ganti file lama di repo.</li>
-                <li>Download tiap thumbnail baru lalu taruh di folder <code>thumbs/</code> di repo.</li>
-                <li>Commit. Web akan update otomatis dalam beberapa menit.</li>
-            </ol>
-            <button type="button" class="btn" id="dl-json"><i class="fas fa-download"></i> Download videos.json</button>
-            <div id="dl-thumbs"></div>
+            <strong>Ada perubahan yang belum dipublikasikan.</strong><br>
+            Tekan tombol di bawah, video langsung dikirim ke GitHub.
+            <button type="button" class="btn" id="btn-publish"><i class="fas fa-cloud-arrow-up"></i> Publikasikan ke GitHub</button>
+            <details style="margin-top:14px">
+                <summary style="cursor:pointer;color:#aaa">Cara manual (tanpa token)</summary>
+                <ol>
+                    <li>Download <code>videos.json</code> lalu ganti file lama di repo.</li>
+                    <li>Download tiap thumbnail lalu taruh di folder <code>thumbs/</code> di repo.</li>
+                </ol>
+                <button type="button" class="btn secondary" id="dl-json"><i class="fas fa-download"></i> Download videos.json</button>
+                <div id="dl-thumbs"></div>
+            </details>
         </div>
 
         <h2>Daftar video</h2>
         <div id="my-list"></div>
+
+        <h2>Pengaturan GitHub (sekali saja)</h2>
+        <div class="box">
+            Supaya tombol Publikasikan bisa bekerja, isi token GitHub. Token hanya tersimpan di browser ini.
+            <ol>
+                <li>Buka GitHub, lalu <strong>Settings &rarr; Developer settings &rarr; Personal access tokens &rarr; Fine-grained tokens &rarr; Generate new token</strong>.</li>
+                <li>Repository access: <strong>Only select repositories</strong>, pilih repo web ini saja.</li>
+                <li>Permissions &rarr; Repository permissions &rarr; <strong>Contents: Read and write</strong>.</li>
+                <li>Generate token, salin, lalu tempel di bawah.</li>
+            </ol>
+            <label for="token">Token GitHub</label>
+            <input type="password" id="token" placeholder="github_pat_..." autocomplete="off">
+            <button type="button" class="btn secondary" id="save-token">Simpan token</button>
+            <div class="msg" id="token-msg"></div>
+        </div>
     </div>
 
     <script src="app.js"></script>
@@ -99,6 +126,7 @@
         let working = [];   // salinan daftar video yang sedang diedit
         let pending = [];   // thumbnail baru yang belum di-upload ke GitHub: {path, blob}
         let newIds = new Set();
+        let previews = {};  // path thumbnail -> URL preview lokal
         let thumbBlob = null;
         let thumbUrl = null;
 
@@ -170,14 +198,15 @@
             const path = 'thumbs/' + id + '.jpg';
 
             working.push({ id, title, url, thumb: path, createdAt: new Date().toISOString() });
-            pending.push({ path, blob: thumbBlob, previewUrl: thumbUrl });
+            pending.push({ path, blob: thumbBlob });
+            previews[path] = thumbUrl;
             newIds.add(id);
 
             thumbUrl = null; // dipakai oleh daftar, jangan di-revoke
             thumbBlob = null;
             form.reset();
             preview.classList.remove('show');
-            showMsg('Video ditambahkan. Download file di bawah lalu upload ke GitHub.', true);
+            showMsg('Video ditambahkan. Tekan "Publikasikan ke GitHub" di bawah.', true);
             refresh();
         });
 
@@ -218,8 +247,7 @@
                 row.className = 'item';
 
                 const img = document.createElement('img');
-                const p = pending.find(x => x.path === v.thumb);
-                img.src = p ? p.previewUrl : v.thumb;
+                img.src = previews[v.thumb] || v.thumb;
 
                 const t = document.createElement('div');
                 t.className = 't';
@@ -235,7 +263,7 @@
                 del.innerHTML = '<i class="fas fa-trash"></i>';
                 del.title = 'Hapus dari daftar';
                 del.addEventListener('click', () => {
-                    if (!confirm('Hapus "' + v.title + '" dari daftar?\n(Berlaku setelah videos.json di-upload ke GitHub)')) return;
+                    if (!confirm('Hapus "' + v.title + '" dari daftar?\n(Berlaku setelah kamu tekan Publikasikan ke GitHub)')) return;
                     working = working.filter(x => x.id !== v.id);
                     pending = pending.filter(x => x.path !== v.thumb);
                     newIds.delete(v.id);
@@ -252,6 +280,111 @@
             renderDownloads();
         }
 
+
+        // ===== Publikasi langsung ke GitHub =====
+        const onPages = location.hostname.endsWith('.github.io');
+        const GH_OWNER = onPages ? location.hostname.split('.')[0] : 'doll18-source';
+        const GH_REPO = onPages ? (location.pathname.split('/')[1] || 'DOLL18') : 'DOLL18';
+        const tokenInput = document.getElementById('token');
+        const tokenMsg = document.getElementById('token-msg');
+
+        function getToken() { try { return localStorage.getItem('gh_token') || ''; } catch (e) { return ''; } }
+        function setToken(t) { try { localStorage.setItem('gh_token', t); } catch (e) {} }
+        tokenInput.value = getToken();
+
+        document.getElementById('save-token').addEventListener('click', () => {
+            const t = tokenInput.value.trim();
+            if (!t) { tokenMsg.textContent = 'Token kosong.'; tokenMsg.className = 'msg err'; return; }
+            setToken(t);
+            tokenMsg.textContent = 'Token tersimpan di browser ini.';
+            tokenMsg.className = 'msg ok';
+        });
+
+        function blobToBase64(blob) {
+            return new Promise((resolve, reject) => {
+                const r = new FileReader();
+                r.onerror = reject;
+                r.onload = () => resolve(String(r.result).split(',')[1]);
+                r.readAsDataURL(blob);
+            });
+        }
+
+        function textToBase64(str) {
+            return btoa(unescape(encodeURIComponent(str)));
+        }
+
+        async function gh(path, options = {}) {
+            const res = await fetch('https://api.github.com/repos/' + GH_OWNER + '/' + GH_REPO + '/contents/' + path, {
+                ...options,
+                headers: {
+                    'Authorization': 'Bearer ' + getToken(),
+                    'Accept': 'application/vnd.github+json',
+                    'Content-Type': 'application/json'
+                }
+            });
+            return res;
+        }
+
+        async function ghError(res) {
+            let detail = '';
+            try { detail = (await res.json()).message || ''; } catch (e) {}
+            if (res.status === 401) return 'Token salah atau kedaluwarsa. Buat token baru.';
+            if (res.status === 403 || res.status === 404) return 'Token tidak punya izin ke repo ' + GH_OWNER + '/' + GH_REPO + ' (butuh Contents: Read and write). ' + detail;
+            return 'GitHub menolak (' + res.status + '). ' + detail;
+        }
+
+        const btnPublish = document.getElementById('btn-publish');
+        btnPublish.addEventListener('click', async () => {
+            if (!getToken()) {
+                showMsg('Isi dan simpan token GitHub dulu di bagian "Pengaturan GitHub" di bawah.', false);
+                tokenInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
+            btnPublish.disabled = true;
+            const label = btnPublish.innerHTML;
+            btnPublish.textContent = 'Mengirim...';
+            try {
+                // 1. kirim thumbnail
+                for (const p of pending) {
+                    showMsg('Mengirim ' + p.path + '...', true);
+                    const res = await gh(p.path, {
+                        method: 'PUT',
+                        body: JSON.stringify({ message: 'tambah thumbnail ' + p.path, content: await blobToBase64(p.blob) })
+                    });
+                    if (!res.ok) throw new Error(await ghError(res));
+                }
+
+                // 2. kirim videos.json (ambil sha file lama dulu)
+                showMsg('Mengirim videos.json...', true);
+                let sha;
+                const cur = await gh('videos.json');
+                if (cur.ok) sha = (await cur.json()).sha;
+                else if (cur.status !== 404) throw new Error(await ghError(cur));
+
+                const sorted = [...working].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                const res = await gh('videos.json', {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        message: 'update daftar video',
+                        content: textToBase64(JSON.stringify(sorted, null, 2) + '\n'),
+                        ...(sha ? { sha } : {})
+                    })
+                });
+                if (!res.ok) throw new Error(await ghError(res));
+
+                pending = [];
+                newIds = new Set();
+                original = [...working];
+                refresh();
+                showMsg('Berhasil dipublikasikan! Web akan update dalam 1-3 menit.', true);
+            } catch (e) {
+                showMsg('Gagal: ' + e.message, false);
+            } finally {
+                btnPublish.disabled = false;
+                btnPublish.innerHTML = label;
+            }
+        });
+
         loadVideos().then(v => {
             if (v === null) {
                 showMsg('Gagal memuat videos.json. Buka lewat server/GitHub Pages, bukan klik dua kali file HTML.', false);
@@ -261,6 +394,11 @@
             original = [...v];
             refresh();
         });
+    </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+        }
     </script>
 </body>
 </html>
