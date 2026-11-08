@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0d0d0d">
+    <meta name="theme-color" content="#ffe9f2">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="DOLL18">
@@ -15,52 +15,52 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        body { background-color: #050505; color: #fff; padding-bottom: 40px; }
+        body { background: linear-gradient(160deg,#fff7fb 0%,#ffe9f2 50%,#fdf2f8 100%) fixed; min-height: 100vh; color: #5b2a45; padding-bottom: 40px; }
 
-        header { position: sticky; top: 0; background-color: #0d0d0d; display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #1f1f1f; z-index: 100; }
-        .logo { font-size: 1.1rem; font-weight: bold; color: #fff; text-decoration: none; }
+        header { position: sticky; top: 0; background-color: rgba(255,255,255,0.55); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid rgba(244,114,182,0.25); z-index: 100; }
+        .logo { font-size: 1.8rem; font-weight: 900; letter-spacing: 2px; color: #db2777; text-decoration: none; display: inline-block; padding: 8px 90px 8px 14px; border-radius: 12px; line-height: 1.1; -webkit-text-stroke: 3px #000; paint-order: stroke fill; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; background: linear-gradient(90deg, rgba(255,240,246,0.92) 0%, rgba(255,240,246,0.55) 45%, rgba(255,240,246,0) 100%), url(logo-bg.png) right center / auto 100% no-repeat; }
 
         .container { max-width: 600px; margin: 0 auto; padding: 16px 12px; }
         @media (min-width: 700px) { .container { padding: 24px 16px; } }
         h1 { font-size: 1.1rem; margin-bottom: 16px; }
-        h2 { font-size: 0.95rem; margin: 28px 0 10px; color: #ccc; }
+        h2 { font-size: 0.95rem; margin: 28px 0 10px; color: #be185d; }
 
-        label { display: block; font-size: 0.85rem; color: #aaa; margin: 14px 0 6px; }
-        input[type=text], input[type=url] { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #333; background-color: #1a1a1a; color: #fff; font-size: 1rem; outline: none; }
-        input:focus { border-color: #666; }
-        input[type=file] { width: 100%; font-size: 0.85rem; color: #ccc; }
+        label { display: block; font-size: 0.85rem; color: #9d174d; margin: 14px 0 6px; }
+        input[type=text], input[type=url] { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(244,114,182,0.35); background-color: rgba(255,255,255,0.6); color: #5b2a45; font-size: 1rem; outline: none; }
+        input:focus { border-color: #ec4899; }
+        input[type=file] { width: 100%; font-size: 0.85rem; color: #4a1d33; }
 
-        .preview { margin-top: 10px; width: 100%; aspect-ratio: 16/9; background: #121212; border: 1px dashed #333; border-radius: 8px; display: none; object-fit: cover; }
+        .preview { margin-top: 10px; width: 100%; aspect-ratio: 16/9; background: rgba(255,255,255,0.5); border: 1px dashed #f472b6; border-radius: 8px; display: none; object-fit: cover; }
         .preview.show { display: block; }
 
-        .btn { margin-top: 20px; width: 100%; background: #fff; color: #000; border: none; padding: 14px; border-radius: 8px; font-weight: bold; font-size: 0.95rem; cursor: pointer; }
-        .btn:hover { background: #ddd; }
-        .btn.secondary { background: transparent; color: #fff; border: 1px solid #333; margin-top: 8px; font-weight: normal; }
-        .btn.secondary:hover { background: #111; }
+        .btn { margin-top: 20px; width: 100%; background: rgba(244,114,182,0.7); color: #fff; border: none; padding: 14px; border-radius: 8px; font-weight: bold; font-size: 0.95rem; cursor: pointer; }
+        .btn:hover { background: rgba(236,72,153,0.85); }
+        .btn.secondary { background: transparent; color: #be185d; border: 1px solid rgba(244,114,182,0.45); margin-top: 8px; font-weight: normal; }
+        .btn.secondary:hover { background: rgba(251,207,232,0.4); }
         .msg { margin-top: 12px; font-size: 0.85rem; min-height: 1.2em; }
-        .msg.ok { color: #4ade80; }
-        .msg.err { color: #f87171; }
+        .msg.ok { color: #16a34a; }
+        .msg.err { color: #dc2626; }
 
-        .box { background: #121212; border: 1px solid #1f1f1f; border-radius: 8px; padding: 12px; margin-top: 12px; font-size: 0.85rem; color: #ccc; line-height: 1.5; }
+        .box { background: rgba(255,255,255,0.55); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border: 1px solid rgba(244,114,182,0.25); border-radius: 8px; padding: 12px; margin-top: 12px; font-size: 0.85rem; color: #6b2145; line-height: 1.5; }
         .box ol { padding-left: 18px; margin-top: 6px; }
-        .box code { background: #1a1a1a; padding: 1px 5px; border-radius: 4px; font-size: 0.8rem; }
+        .box code { background: #fce7f3; padding: 1px 5px; border-radius: 4px; font-size: 0.8rem; }
         #publish-box { display: none; }
         #publish-box.show { display: block; }
 
-        .item { display: flex; gap: 10px; align-items: center; background: #121212; border: 1px solid #1f1f1f; border-radius: 8px; padding: 8px; margin-bottom: 8px; }
-        .item img { width: 80px; aspect-ratio: 16/9; object-fit: cover; border-radius: 4px; background: #1a1a1a; }
+        .item { display: flex; gap: 10px; align-items: center; background: rgba(255,255,255,0.55); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border: 1px solid rgba(244,114,182,0.25); border-radius: 8px; padding: 8px; margin-bottom: 8px; }
+        .item img { width: 80px; aspect-ratio: 16/9; object-fit: cover; border-radius: 4px; background: #fce7f3; }
         .item .t { flex: 1; font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-        .item .new { color: #4ade80; font-size: 0.7rem; display: block; }
-        .item button { background: transparent; border: 1px solid #333; color: #f87171; border-radius: 6px; padding: 12px 14px; cursor: pointer; }
-        .item button:hover { background: #1a1a1a; }
-        .empty { font-size: 0.85rem; color: #666; }
+        .item .new { color: #16a34a; font-size: 0.7rem; display: block; }
+        .item button { background: transparent; border: 1px solid rgba(244,114,182,0.4); color: #e11d48; border-radius: 6px; padding: 12px 14px; cursor: pointer; }
+        .item button:hover { background: #fce7f3; }
+        .empty { font-size: 0.85rem; color: #b0457a; }
     </style>
 </head>
 <body>
 
     <header>
         <a href="index.html" class="logo">DOLL18</a>
-        <a href="index.html" style="color:#ccc;text-decoration:none;font-size:0.9rem;"><i class="fas fa-arrow-left"></i> Kembali</a>
+        <a href="index.html" style="color:#db2777;text-decoration:none;font-size:0.9rem;"><i class="fas fa-arrow-left"></i> Kembali</a>
     </header>
 
     <div class="container">
@@ -86,7 +86,7 @@
             Tekan tombol di bawah, video langsung dikirim ke GitHub.
             <button type="button" class="btn" id="btn-publish"><i class="fas fa-cloud-arrow-up"></i> Publikasikan ke GitHub</button>
             <details style="margin-top:14px">
-                <summary style="cursor:pointer;color:#aaa">Cara manual (tanpa token)</summary>
+                <summary style="cursor:pointer;color:#9d174d">Cara manual (tanpa token)</summary>
                 <ol>
                     <li>Download <code>videos.json</code> lalu ganti file lama di repo.</li>
                     <li>Download tiap thumbnail lalu taruh di folder <code>thumbs/</code> di repo.</li>
