@@ -3,6 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        (function () {
+            try {
+                var t = localStorage.getItem('theme');
+                if (t === 'dark') {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    var m = document.querySelector('meta[name="theme-color"]');
+                    if (m) m.setAttribute('content', '#210d19');
+                }
+            } catch (e) {}
+        })();
+    </script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#ffe9f2">
     <meta name="mobile-web-app-capable" content="yes">
@@ -38,6 +50,46 @@
         .video-meta { padding: 6px 12px 10px; font-size: 0.8rem; color: #b0457a; }
         .meta-item { display: flex; align-items: center; gap: 5px; }
         .empty { text-align: center; color: #b0457a; padding: 40px 0; font-size: 0.9rem; }
+
+        /* ===== Mode gelap ===== */
+        html[data-theme="dark"] body { background: linear-gradient(160deg,#16080f 0%,#210d19 50%,#180a12 100%) fixed; color: #f6dbe8; }
+        html[data-theme="dark"] header { background-color: rgba(34,14,25,0.6); border-bottom-color: rgba(244,114,182,0.2); }
+        html[data-theme="dark"] .logo { color: #f472b6; background: linear-gradient(90deg, rgba(58,22,41,0.92) 0%, rgba(58,22,41,0.55) 45%, rgba(58,22,41,0) 100%), url(logo-bg.png) right center / auto 100% no-repeat; }
+        html[data-theme="dark"] .header-icons i, html[data-theme="dark"] .header-icons a { color: #f9a8d4; }
+        html[data-theme="dark"] .search-container { background-color: rgba(34,14,25,0.55); border-bottom-color: rgba(244,114,182,0.2); }
+        html[data-theme="dark"] .search-box, html[data-theme="dark"] input[type=text], html[data-theme="dark"] input[type=url], html[data-theme="dark"] input[type=password] { background-color: rgba(255,255,255,0.07); border-color: rgba(244,114,182,0.3); color: #f6dbe8; }
+        html[data-theme="dark"] .search-box::placeholder, html[data-theme="dark"] input::placeholder { color: #a8738c; }
+        html[data-theme="dark"] .video-card, html[data-theme="dark"] .box, html[data-theme="dark"] .item { background-color: rgba(255,255,255,0.06); border-color: rgba(244,114,182,0.2); box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+        html[data-theme="dark"] .thumbnail-container, html[data-theme="dark"] .preview { background-color: rgba(244,114,182,0.1); }
+        html[data-theme="dark"] .video-meta, html[data-theme="dark"] .empty, html[data-theme="dark"] .publish-info { color: #c98aa9; }
+        html[data-theme="dark"] .publish-info { border-bottom-color: rgba(244,114,182,0.2); }
+        html[data-theme="dark"] .action-btn-outline, html[data-theme="dark"] .notfound a, html[data-theme="dark"] .btn.secondary { color: #f9a8d4; border-color: rgba(244,114,182,0.4); }
+        html[data-theme="dark"] .action-btn-outline:hover, html[data-theme="dark"] .btn.secondary:hover, html[data-theme="dark"] .item button:hover { background-color: rgba(244,114,182,0.15); }
+        html[data-theme="dark"] label, html[data-theme="dark"] summary { color: #e9a3c4 !important; }
+        html[data-theme="dark"] h2 { color: #f9a8d4; }
+        html[data-theme="dark"] .box, html[data-theme="dark"] input[type=file] { color: #e8c3d5; }
+        html[data-theme="dark"] .box code { background: rgba(244,114,182,0.15); }
+        html[data-theme="dark"] .msg.ok, html[data-theme="dark"] .item .new { color: #4ade80; }
+        html[data-theme="dark"] .msg.err { color: #fb7185; }
+        html[data-theme="dark"] .item button { color: #fb7185; border-color: rgba(244,114,182,0.3); }
+        html[data-theme="dark"] a[style*="color:#db2777"] { color: #f9a8d4 !important; }
+        #theme-btn { transition: transform 0.3s; }
+        #theme-btn:active { transform: rotate(40deg) scale(0.9); }
+
+        /* ===== Pagination ===== */
+        .pagination { max-width: 1100px; margin: 8px auto 0; padding: 0 12px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; }
+        .pagination:empty { display: none; }
+        .pg-btn { min-width: 40px; height: 40px; padding: 0 12px; border-radius: 12px; border: 1px solid transparent; background: transparent; color: #9d174d; font-size: 0.95rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+        .pg-btn:hover:not(:disabled):not(.active) { background: rgba(244,114,182,0.18); }
+        .pg-btn.active { background: #ec4899; color: #fff; border: 2px solid #000; box-shadow: 2px 2px 0 #000; cursor: default; }
+        .pg-btn.nav { background: rgba(255,255,255,0.55); border: 1px solid rgba(244,114,182,0.4); color: #be185d; }
+        .pg-btn:disabled { opacity: 0.4; cursor: default; }
+        .pg-dots { min-width: 24px; text-align: center; color: #b0457a; font-weight: 700; }
+        html[data-theme="dark"] .pg-btn { color: #f3c4da; }
+        html[data-theme="dark"] .pg-btn:hover:not(:disabled):not(.active) { background: rgba(244,114,182,0.18); }
+        html[data-theme="dark"] .pg-btn.active { background: #ec4899; color: #fff; border-color: #000; }
+        html[data-theme="dark"] .pg-btn.nav { background: rgba(255,255,255,0.07); border-color: rgba(244,114,182,0.35); color: #f9a8d4; }
+        html[data-theme="dark"] .pg-dots { color: #c98aa9; }
     </style>
 </head>
 <body>
@@ -45,6 +97,7 @@
     <header>
         <a href="index.html" class="logo">DOLL18</a>
         <div class="header-icons">
+            <i class="fas fa-sun" id="theme-btn" title="Ganti tema"></i>
             <i class="fas fa-search" id="search-btn"></i>
         </div>
     </header>
@@ -54,12 +107,16 @@
     </div>
 
     <div class="video-feed" id="video-list"></div>
+    <nav class="pagination" id="pagination" aria-label="Halaman"></nav>
 
     <script src="app.js"></script>
     <script>
         const listEl = document.getElementById('video-list');
         const searchInput = document.getElementById('search-input');
         let VIDEOS = [];
+        const PER_PAGE = 10;
+        const pagerEl = document.getElementById('pagination');
+        let page = Math.max(1, parseInt(new URLSearchParams(location.search).get('page'), 10) || 1);
 
         document.getElementById('search-btn').addEventListener('click', () => {
             document.getElementById('search-bar').classList.toggle('active');
@@ -68,6 +125,7 @@
 
         function render(filter = '') {
             listEl.innerHTML = '';
+            pagerEl.innerHTML = '';
             const q = filter.trim().toLowerCase();
             if (VIDEOS === null) {
                 const e = document.createElement('div');
@@ -86,7 +144,12 @@
                 return;
             }
 
-            videos.forEach(v => {
+            const totalPages = Math.ceil(videos.length / PER_PAGE);
+            if (page > totalPages) page = totalPages;
+            if (page < 1) page = 1;
+            const pageVideos = videos.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+
+            pageVideos.forEach(v => {
                 const a = document.createElement('a');
                 a.className = 'video-card';
                 a.href = 'watch.html?id=' + encodeURIComponent(v.id);
@@ -116,9 +179,57 @@
                 a.append(thumb, title, meta);
                 listEl.appendChild(a);
             });
+
+            renderPager(totalPages, filter);
         }
 
-        searchInput.addEventListener('input', e => render(e.target.value));
+        function goPage(n, filter) {
+            page = n;
+            try { history.replaceState(null, '', n > 1 ? '?page=' + n : location.pathname); } catch (e) {}
+            render(filter);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function pageList(total, cur) {
+            if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+            const set = new Set([1, 2, total - 1, total, cur - 1, cur, cur + 1]);
+            const nums = [...set].filter(n => n >= 1 && n <= total).sort((a, b) => a - b);
+            const out = [];
+            nums.forEach((n, i) => {
+                if (i && n - nums[i - 1] > 1) out.push('...');
+                out.push(n);
+            });
+            return out;
+        }
+
+        function renderPager(total, filter) {
+            if (total <= 1) return;
+            const mk = (label, onClick, cls, disabled) => {
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.className = 'pg-btn ' + (cls || '');
+                b.innerHTML = label;
+                b.disabled = !!disabled;
+                if (!disabled && onClick) b.addEventListener('click', onClick);
+                return b;
+            };
+            pagerEl.appendChild(mk('<i class="fas fa-chevron-left"></i> Prev', () => goPage(page - 1, filter), 'nav', page === 1));
+            pageList(total, page).forEach(n => {
+                if (n === '...') {
+                    const d = document.createElement('span');
+                    d.className = 'pg-dots';
+                    d.textContent = '...';
+                    pagerEl.appendChild(d);
+                } else {
+                    const b = mk(String(n), () => goPage(n, filter), n === page ? 'active' : '');
+                    if (n === page) b.setAttribute('aria-current', 'page');
+                    pagerEl.appendChild(b);
+                }
+            });
+            pagerEl.appendChild(mk('Next <i class="fas fa-chevron-right"></i>', () => goPage(page + 1, filter), 'nav', page === total));
+        }
+
+        searchInput.addEventListener('input', e => { page = 1; render(e.target.value); });
         // Akses rahasia ke halaman upload: ketuk logo DOLL18 5x dengan cepat
         let logoTaps = 0, logoTimer;
         document.querySelector('.logo').addEventListener('click', e => {

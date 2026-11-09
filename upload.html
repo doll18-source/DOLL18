@@ -3,6 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        (function () {
+            try {
+                var t = localStorage.getItem('theme');
+                if (t === 'dark') {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    var m = document.querySelector('meta[name="theme-color"]');
+                    if (m) m.setAttribute('content', '#210d19');
+                }
+            } catch (e) {}
+        })();
+    </script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#ffe9f2">
     <meta name="mobile-web-app-capable" content="yes">
@@ -54,6 +66,31 @@
         .item button { background: transparent; border: 1px solid rgba(244,114,182,0.4); color: #e11d48; border-radius: 6px; padding: 12px 14px; cursor: pointer; }
         .item button:hover { background: #fce7f3; }
         .empty { font-size: 0.85rem; color: #b0457a; }
+
+        /* ===== Mode gelap ===== */
+        html[data-theme="dark"] body { background: linear-gradient(160deg,#16080f 0%,#210d19 50%,#180a12 100%) fixed; color: #f6dbe8; }
+        html[data-theme="dark"] header { background-color: rgba(34,14,25,0.6); border-bottom-color: rgba(244,114,182,0.2); }
+        html[data-theme="dark"] .logo { color: #f472b6; background: linear-gradient(90deg, rgba(58,22,41,0.92) 0%, rgba(58,22,41,0.55) 45%, rgba(58,22,41,0) 100%), url(logo-bg.png) right center / auto 100% no-repeat; }
+        html[data-theme="dark"] .header-icons i, html[data-theme="dark"] .header-icons a { color: #f9a8d4; }
+        html[data-theme="dark"] .search-container { background-color: rgba(34,14,25,0.55); border-bottom-color: rgba(244,114,182,0.2); }
+        html[data-theme="dark"] .search-box, html[data-theme="dark"] input[type=text], html[data-theme="dark"] input[type=url], html[data-theme="dark"] input[type=password] { background-color: rgba(255,255,255,0.07); border-color: rgba(244,114,182,0.3); color: #f6dbe8; }
+        html[data-theme="dark"] .search-box::placeholder, html[data-theme="dark"] input::placeholder { color: #a8738c; }
+        html[data-theme="dark"] .video-card, html[data-theme="dark"] .box, html[data-theme="dark"] .item { background-color: rgba(255,255,255,0.06); border-color: rgba(244,114,182,0.2); box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+        html[data-theme="dark"] .thumbnail-container, html[data-theme="dark"] .preview { background-color: rgba(244,114,182,0.1); }
+        html[data-theme="dark"] .video-meta, html[data-theme="dark"] .empty, html[data-theme="dark"] .publish-info { color: #c98aa9; }
+        html[data-theme="dark"] .publish-info { border-bottom-color: rgba(244,114,182,0.2); }
+        html[data-theme="dark"] .action-btn-outline, html[data-theme="dark"] .notfound a, html[data-theme="dark"] .btn.secondary { color: #f9a8d4; border-color: rgba(244,114,182,0.4); }
+        html[data-theme="dark"] .action-btn-outline:hover, html[data-theme="dark"] .btn.secondary:hover, html[data-theme="dark"] .item button:hover { background-color: rgba(244,114,182,0.15); }
+        html[data-theme="dark"] label, html[data-theme="dark"] summary { color: #e9a3c4 !important; }
+        html[data-theme="dark"] h2 { color: #f9a8d4; }
+        html[data-theme="dark"] .box, html[data-theme="dark"] input[type=file] { color: #e8c3d5; }
+        html[data-theme="dark"] .box code { background: rgba(244,114,182,0.15); }
+        html[data-theme="dark"] .msg.ok, html[data-theme="dark"] .item .new { color: #4ade80; }
+        html[data-theme="dark"] .msg.err { color: #fb7185; }
+        html[data-theme="dark"] .item button { color: #fb7185; border-color: rgba(244,114,182,0.3); }
+        html[data-theme="dark"] a[style*="color:#db2777"] { color: #f9a8d4 !important; }
+        #theme-btn { transition: transform 0.3s; }
+        #theme-btn:active { transform: rotate(40deg) scale(0.9); }
     </style>
 </head>
 <body>

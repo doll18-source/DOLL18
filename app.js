@@ -44,3 +44,23 @@ function getDownloadUrl(embedUrl) {
     } catch (e) {}
     return null;
 }
+
+// Tombol tema: matahari = mode pink (terang), bulan = mode gelap
+function initThemeToggle() {
+    const btn = document.getElementById('theme-btn');
+    const root = document.documentElement;
+    const meta = document.querySelector('meta[name="theme-color"]');
+    function apply(dark) {
+        if (dark) root.setAttribute('data-theme', 'dark'); else root.removeAttribute('data-theme');
+        if (meta) meta.setAttribute('content', dark ? '#210d19' : '#ffe9f2');
+        if (btn) btn.className = dark ? 'fas fa-moon' : 'fas fa-sun';
+    }
+    apply(root.getAttribute('data-theme') === 'dark');
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+        const dark = root.getAttribute('data-theme') !== 'dark';
+        apply(dark);
+        try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch (e) {}
+    });
+}
+initThemeToggle();
