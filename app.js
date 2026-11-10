@@ -64,3 +64,23 @@ function initThemeToggle() {
     });
 }
 initThemeToggle();
+
+// Genre: terima teks "a, b, c" atau array, kembalikan array bersih (maks 8, tiap genre maks 20 huruf)
+function parseGenres(input) {
+    const arr = Array.isArray(input) ? input : String(input || '').split(/[,;\n]+/);
+    const seen = new Set(), out = [];
+    for (const g of arr) {
+        const t = String(g).trim().replace(/\s+/g, ' ').slice(0, 20);
+        if (!t) continue;
+        const k = t.toLowerCase();
+        if (seen.has(k)) continue;
+        seen.add(k);
+        out.push(t);
+        if (out.length >= 8) break;
+    }
+    return out;
+}
+
+function videoGenres(v) {
+    return Array.isArray(v && v.genres) ? parseGenres(v.genres) : [];
+}

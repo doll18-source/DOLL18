@@ -91,6 +91,14 @@
         html[data-theme="dark"] a[style*="color:#db2777"] { color: #f9a8d4 !important; }
         #theme-btn { transition: transform 0.3s; }
         #theme-btn:active { transform: rotate(40deg) scale(0.9); }
+
+        .suggest { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+        .suggest button { background: rgba(244,114,182,0.15); color: #be185d; border: 1px solid rgba(244,114,182,0.35); border-radius: 14px; padding: 5px 12px; font-size: 0.8rem; cursor: pointer; }
+        .item .genres { display: block; color: #b0457a; font-size: 0.72rem; margin-top: 2px; }
+        .item button.edit { color: #be185d; }
+        html[data-theme="dark"] .suggest button { color: #f9a8d4; background: rgba(244,114,182,0.15); }
+        html[data-theme="dark"] .item .genres { color: #c98aa9; }
+        html[data-theme="dark"] .item button.edit { color: #f9a8d4; }
     </style>
 </head>
 <body>
@@ -109,6 +117,10 @@
 
             <label for="url">Link Video (embed)</label>
             <input type="url" id="url" placeholder="https://playmogo.com/e/xxxxxxxx" required>
+
+            <label for="genres">Genre (pisahkan dengan koma)</label>
+            <input type="text" id="genres" placeholder="contoh: drama, jepang, romantis" maxlength="160" autocomplete="off">
+            <div class="suggest" id="genre-suggest"></div>
 
             <label for="thumb">Gambar Thumbnail</label>
             <input type="file" id="thumb" accept="image/*" required>
@@ -166,6 +178,7 @@
         let previews = {};  // path thumbnail -> URL preview lokal
         let thumbBlob = null;
         let thumbUrl = null;
+        let dirty = false;  // ada perubahan genre pada video lama
 
         function showMsg(text, ok) {
             msg.textContent = text;
@@ -234,7 +247,8 @@
             const id = slugify(title) + '-' + Date.now().toString(36);
             const path = 'thumbs/' + id + '.jpg';
 
-            working.push({ id, title, url, thumb: path, createdAt: new Date().toISOString() });
+            const genres = parseGenres(document.getElementById('genres').value);
+            working.push({ id, title, url, ...(genres.length ? { genres } : {}), thumb: path, createdAt: new Date().toISOString() });
             pending.push({ path, blob: thumbBlob });
             previews[path] = thumbUrl;
             newIds.add(id);
@@ -264,7 +278,7 @@
                 b.addEventListener('click', () => downloadBlob(p.blob, p.path.replace('thumbs/', '')));
                 box.appendChild(b);
             });
-            publishBox.classList.toggle('show', newIds.size > 0 || working.length !== original.length);
+            publishBox.classList.toggle('show', newIds.size > 0 || working.length !== original.length || dirty);
         }
 
         let original = [];
@@ -307,14 +321,53 @@
                     refresh();
                 });
 
-                row.append(img, t, del);
+                const gs = videoGenres(v);
+                if (gs.length) {
+                    const g = document.createElement('span');
+                    g.className = 'genres';
+                    g.textContent = gs.join(' · ');
+                    t.appendChild(g);
+                }
+
+                const edit = document.createElement('button');
+                edit.className = 'edit';
+                edit.innerHTML = '<i class="fas fa-tags"></i>';
+                edit.title = 'Ubah genre';
+                edit.addEventListener('click', () => {
+                    const res = prompt('Genre untuk "' + v.title + '"\n(pisahkan dengan koma)', gs.join(', '));
+                    if (res === null) return;
+                    const next = parseGenres(res);
+                    if (next.length) v.genres = next; else delete v.genres;
+                    dirty = true;
+                    refresh();
+                });
+
+                row.append(img, t, edit, del);
                 box.appendChild(row);
+            });
+        }
+
+        function renderSuggest() {
+            const box = document.getElementById('genre-suggest');
+            box.innerHTML = '';
+            const seen = new Map();
+            working.forEach(v => videoGenres(v).forEach(g => { if (!seen.has(g.toLowerCase())) seen.set(g.toLowerCase(), g); }));
+            seen.forEach(name => {
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.textContent = '+ ' + name;
+                b.addEventListener('click', () => {
+                    const inp = document.getElementById('genres');
+                    inp.value = parseGenres(inp.value + ',' + name).join(', ');
+                });
+                box.appendChild(b);
             });
         }
 
         function refresh() {
             renderList();
             renderDownloads();
+            renderSuggest();
         }
 
 
@@ -412,6 +465,7 @@
                 pending = [];
                 newIds = new Set();
                 original = [...working];
+                dirty = false;
                 refresh();
                 showMsg('Berhasil dipublikasikan! Web akan update dalam 1-3 menit.', true);
             } catch (e) {

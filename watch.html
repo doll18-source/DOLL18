@@ -72,6 +72,25 @@
         html[data-theme="dark"] a[style*="color:#db2777"] { color: #f9a8d4 !important; }
         #theme-btn { transition: transform 0.3s; }
         #theme-btn:active { transform: rotate(40deg) scale(0.9); }
+
+        .help-box { margin-bottom: 14px; border-radius: 12px; border: 1px solid rgba(244,114,182,0.3); background: rgba(255,255,255,0.55); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); font-size: 0.85rem; line-height: 1.55; color: #6b2145; }
+        .help-box summary { cursor: pointer; padding: 12px 14px; font-weight: 600; color: #be185d; list-style: none; display: flex; align-items: center; gap: 8px; }
+        .help-box summary::-webkit-details-marker { display: none; }
+        .help-box summary::after { content: '\25BE'; margin-left: auto; transition: transform 0.2s; }
+        .help-box[open] summary::after { transform: rotate(180deg); }
+        .help-body { padding: 0 14px 14px; }
+        .help-body ul { padding-left: 18px; margin: 6px 0 10px; }
+        .help-body li { margin-bottom: 4px; }
+        .help-body code { background: rgba(244,114,182,0.18); padding: 1px 6px; border-radius: 4px; font-size: 0.8rem; }
+        .help-body .action-btn-outline { margin-top: 4px; }
+        html[data-theme="dark"] .help-box { background: rgba(255,255,255,0.06); border-color: rgba(244,114,182,0.25); color: #e8c3d5; }
+        html[data-theme="dark"] .help-box summary { color: #f9a8d4; }
+        html[data-theme="dark"] .help-body code { background: rgba(244,114,182,0.18); }
+
+        .genre-links { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+        .genre-links a { font-size: 0.8rem; font-weight: 600; padding: 5px 12px; border-radius: 14px; background: rgba(244,114,182,0.18); color: #be185d; text-decoration: none; border: 1px solid rgba(244,114,182,0.3); }
+        .genre-links a:hover { background: rgba(244,114,182,0.3); }
+        html[data-theme="dark"] .genre-links a { background: rgba(244,114,182,0.2); color: #f9a8d4; border-color: rgba(244,114,182,0.3); }
     </style>
 </head>
 <body>
@@ -115,6 +134,31 @@
 
             content.append(h1, player);
 
+            // Bantuan kalau pemutar kosong (biasanya karena diblokir provider internet)
+            const help = document.createElement('details');
+            help.className = 'help-box';
+            help.innerHTML =
+                '<summary><i class="fas fa-circle-question"></i> Video tidak muncul?</summary>' +
+                '<div class="help-body">' +
+                'Biasanya pemutar diblokir oleh provider internet. Coba salah satu cara ini:' +
+                '<ul>' +
+                '<li><strong>Android:</strong> Pengaturan &rarr; Jaringan &rarr; <strong>DNS Pribadi</strong> &rarr; isi <code>one.one.one.one</code></li>' +
+                '<li><strong>iPhone / WiFi:</strong> ganti DNS ke <code>1.1.1.1</code> atau <code>8.8.8.8</code></li>' +
+                '<li>Atau pakai VPN, lalu muat ulang halaman ini.</li>' +
+                '</ul>' +
+                '</div>';
+            const body = help.querySelector('.help-body');
+            if (isValidHttpUrl(video.url)) {
+                const open = document.createElement('a');
+                open.href = video.url;
+                open.target = '_blank';
+                open.rel = 'noopener';
+                open.className = 'action-btn-outline';
+                open.innerHTML = '<i class="fas fa-up-right-from-square"></i> Buka di tab baru';
+                body.appendChild(open);
+            }
+            content.appendChild(help);
+
             const dl = getDownloadUrl(video.url);
             if (dl) {
                 const bar = document.createElement('div');
@@ -135,6 +179,19 @@
             info.children[0].append(' ' + formatDate(video.createdAt));
             info.children[1].append(' ' + formatTime(video.createdAt));
             content.appendChild(info);
+
+            const gs = videoGenres(video);
+            if (gs.length) {
+                const gl = document.createElement('div');
+                gl.className = 'genre-links';
+                gs.forEach(g => {
+                    const a = document.createElement('a');
+                    a.href = 'index.html?genre=' + encodeURIComponent(g);
+                    a.textContent = g;
+                    gl.appendChild(a);
+                });
+                content.insertBefore(gl, info);
+            }
         }
         });
     </script>

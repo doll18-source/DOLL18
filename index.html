@@ -90,6 +90,18 @@
         html[data-theme="dark"] .pg-btn.active { background: #ec4899; color: #fff; border-color: #000; }
         html[data-theme="dark"] .pg-btn.nav { background: rgba(255,255,255,0.07); border-color: rgba(244,114,182,0.35); color: #f9a8d4; }
         html[data-theme="dark"] .pg-dots { color: #c98aa9; }
+
+        /* ===== Genre ===== */
+        .genre-bar { max-width: 1100px; margin: 0 auto; padding: 10px 12px 0; display: flex; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+        .genre-bar::-webkit-scrollbar { display: none; }
+        .genre-bar:empty { display: none; }
+        .chip { flex: 0 0 auto; border: 1px solid rgba(244,114,182,0.4); background: rgba(255,255,255,0.55); color: #be185d; border-radius: 16px; padding: 6px 14px; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+        .chip.active { background: #ec4899; border-color: #ec4899; color: #fff; }
+        .card-genres { padding: 0 12px; display: flex; flex-wrap: wrap; gap: 4px; }
+        .pill { font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; background: rgba(244,114,182,0.18); color: #be185d; font-weight: 600; }
+        html[data-theme="dark"] .chip { background: rgba(255,255,255,0.07); border-color: rgba(244,114,182,0.35); color: #f9a8d4; }
+        html[data-theme="dark"] .chip.active { background: #ec4899; border-color: #ec4899; color: #fff; }
+        html[data-theme="dark"] .pill { background: rgba(244,114,182,0.2); color: #f9a8d4; }
     </style>
 </head>
 <body>
@@ -106,6 +118,8 @@
         <input type="text" class="search-box" id="search-input" placeholder="Cari video...">
     </div>
 
+    <div class="genre-bar" id="genre-bar"></div>
+
     <div class="video-feed" id="video-list"></div>
     <nav class="pagination" id="pagination" aria-label="Halaman"></nav>
 
@@ -117,6 +131,8 @@
         const PER_PAGE = 10;
         const pagerEl = document.getElementById('pagination');
         let page = Math.max(1, parseInt(new URLSearchParams(location.search).get('page'), 10) || 1);
+        let genre = (new URLSearchParams(location.search).get('genre') || '').trim();
+        const barEl = document.getElementById('genre-bar');
 
         document.getElementById('search-btn').addEventListener('click', () => {
             document.getElementById('search-bar').classList.toggle('active');
@@ -134,7 +150,12 @@
                 listEl.appendChild(e);
                 return;
             }
-            const videos = VIDEOS.filter(v => v.title.toLowerCase().includes(q));
+            const gl = genre.toLowerCase();
+            const videos = VIDEOS.filter(v => {
+                const gs = videoGenres(v);
+                if (gl && !gs.some(g => g.toLowerCase() === gl)) return false;
+                return !q || v.title.toLowerCase().includes(q) || gs.some(g => g.toLowerCase().includes(q));
+            });
 
             if (!videos.length) {
                 const e = document.createElement('div');
@@ -176,16 +197,68 @@
                 item.append(' ' + formatDate(v.createdAt));
                 meta.appendChild(item);
 
-                a.append(thumb, title, meta);
+                const gs = videoGenres(v);
+                a.append(thumb, title);
+                if (gs.length) {
+                    const gw = document.createElement('div');
+                    gw.className = 'card-genres';
+                    gs.slice(0, 3).forEach(g => {
+                        const p = document.createElement('span');
+                        p.className = 'pill';
+                        p.textContent = g;
+                        gw.appendChild(p);
+                    });
+                    a.appendChild(gw);
+                }
+                a.appendChild(meta);
                 listEl.appendChild(a);
             });
 
             renderPager(totalPages, filter);
         }
 
+        function syncUrl() {
+            const p = new URLSearchParams();
+            if (genre) p.set('genre', genre);
+            if (page > 1) p.set('page', page);
+            const qs = p.toString();
+            try { history.replaceState(null, '', qs ? '?' + qs : location.pathname); } catch (e) {}
+        }
+
+        function renderGenreBar() {
+            barEl.innerHTML = '';
+            if (!VIDEOS) return;
+            const count = new Map();
+            VIDEOS.forEach(v => videoGenres(v).forEach(g => {
+                const k = g.toLowerCase();
+                const cur = count.get(k) || { name: g, n: 0 };
+                cur.n++;
+                count.set(k, cur);
+            }));
+            if (!count.size) return;
+            const list = [...count.values()].sort((a, b) => b.n - a.n || a.name.localeCompare(b.name));
+            const mk = (label, value) => {
+                const b = document.createElement('button');
+                b.type = 'button';
+                const on = value.toLowerCase() === genre.toLowerCase();
+                b.className = 'chip' + (on ? ' active' : '');
+                b.textContent = label;
+                b.addEventListener('click', () => {
+                    genre = on ? '' : value;
+                    page = 1;
+                    syncUrl();
+                    renderGenreBar();
+                    render(searchInput.value);
+                });
+                return b;
+            };
+            barEl.appendChild(mk('Semua', ''));
+            list.forEach(g => barEl.appendChild(mk(g.name, g.name)));
+        }
+
         function goPage(n, filter) {
             page = n;
-            try { history.replaceState(null, '', n > 1 ? '?page=' + n : location.pathname); } catch (e) {}
+            syncUrl();
             render(filter);
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -229,17 +302,11 @@
             pagerEl.appendChild(mk('Next <i class="fas fa-chevron-right"></i>', () => goPage(page + 1, filter), 'nav', page === total));
         }
 
-        searchInput.addEventListener('input', e => { page = 1; render(e.target.value); });
-        // Akses rahasia ke halaman upload: ketuk logo DOLL18 5x dengan cepat
-        let logoTaps = 0, logoTimer;
-        document.querySelector('.logo').addEventListener('click', e => {
-            logoTaps++;
-            clearTimeout(logoTimer);
-            logoTimer = setTimeout(() => { logoTaps = 0; }, 1500);
-            if (logoTaps >= 5) { e.preventDefault(); location.href = 'upload.html'; }
-        });
+        searchInput.addEventListener('input', e => { page = 1; syncUrl(); render(e.target.value); });
+        // Ketuk logo DOLL18 sekali untuk membuka halaman upload
+        document.querySelector('.logo').setAttribute('href', 'upload.html');
 
-        loadVideos().then(v => { VIDEOS = v; render(searchInput.value); });
+        loadVideos().then(v => { VIDEOS = v; renderGenreBar(); render(searchInput.value); });
     </script>
     <script>
         if ('serviceWorker' in navigator) {
