@@ -88,11 +88,14 @@
         html[data-theme="dark"] .help-box summary { color: #f9a8d4; }
         html[data-theme="dark"] .help-body code { background: rgba(244,114,182,0.18); }
 
-        .genre-links { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
-        .genre-links a { font-size: 0.8rem; font-weight: 600; padding: 5px 12px; border-radius: 14px; background: rgba(244,114,182,0.18); color: #be185d; text-decoration: none; border: 1px solid rgba(244,114,182,0.3); }
-        .genre-links a:hover { background: rgba(244,114,182,0.3); }
-        html[data-theme="dark"] .genre-links a { background: rgba(244,114,182,0.2); color: #f9a8d4; border-color: rgba(244,114,182,0.3); }
+        .tag-links { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+        .tag-links a { text-transform: uppercase; font-size: 0.8rem; font-weight: 600; padding: 5px 12px; border-radius: 14px; background: rgba(244,114,182,0.18); color: #be185d; text-decoration: none; border: 1px solid rgba(244,114,182,0.3); }
+        .tag-links a.cat { background: #ec4899; color: #fff; border-color: #ec4899; }
+        .tag-links a:hover { background: rgba(244,114,182,0.3); }
+        html[data-theme="dark"] .tag-links a.cat { background: #ec4899; color: #fff; border-color: #ec4899; }
+        html[data-theme="dark"] .tag-links a { background: rgba(244,114,182,0.2); color: #f9a8d4; border-color: rgba(244,114,182,0.3); }
     </style>
+    <link rel="stylesheet" href="glass.css">
 </head>
 <body>
 
@@ -183,13 +186,21 @@
             info.children[1].append(' ' + formatTime(video.createdAt));
             content.appendChild(info);
 
-            const gs = videoGenres(video);
-            if (gs.length) {
+            const gs = videoTags(video);
+            const cat = videoCategory(video);
+            if (cat || gs.length) {
                 const gl = document.createElement('div');
-                gl.className = 'genre-links';
+                gl.className = 'tag-links';
+                if (cat) {
+                    const ca = document.createElement('a');
+                    ca.className = 'cat';
+                    ca.href = 'index.html?kategori=' + encodeURIComponent(cat);
+                    ca.textContent = cat;
+                    gl.appendChild(ca);
+                }
                 gs.forEach(g => {
                     const a = document.createElement('a');
-                    a.href = 'index.html?genre=' + encodeURIComponent(g);
+                    a.href = 'index.html?tag=' + encodeURIComponent(g);
                     a.textContent = g;
                     gl.appendChild(a);
                 });

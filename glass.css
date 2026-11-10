@@ -1,0 +1,137 @@
+/* ===== Tampilan kaca (semi transparan + mengkilap) =====
+   Dimuat setelah <style> di tiap halaman, jadi menimpa warna datar sebelumnya. */
+
+/* --- Latar: gradasi + bola warna lembut supaya efek kaca terlihat --- */
+body::before {
+    content: ''; position: fixed; inset: -10%; z-index: -1; pointer-events: none;
+    background:
+        radial-gradient(42% 32% at 12% 8%,  rgba(249,168,212,0.75), transparent 70%),
+        radial-gradient(38% 30% at 92% 18%, rgba(253,164,175,0.55), transparent 70%),
+        radial-gradient(45% 35% at 80% 92%, rgba(233,213,255,0.65), transparent 70%),
+        radial-gradient(40% 30% at 8% 85%,  rgba(251,207,232,0.8),  transparent 70%);
+}
+html[data-theme="dark"] body::before {
+    background:
+        radial-gradient(42% 32% at 12% 8%,  rgba(219,39,119,0.38), transparent 70%),
+        radial-gradient(38% 30% at 92% 18%, rgba(126,34,206,0.30), transparent 70%),
+        radial-gradient(45% 35% at 80% 92%, rgba(190,24,93,0.32),  transparent 70%),
+        radial-gradient(40% 30% at 8% 85%,  rgba(88,28,135,0.32),  transparent 70%);
+}
+
+/* --- Permukaan kaca: header, kartu, kotak, daftar --- */
+header, .search-container, .video-card, .help-box, .box, .item {
+    background:
+        linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.10) 42%, rgba(255,255,255,0) 43%),
+        linear-gradient(145deg, rgba(255,255,255,0.48), rgba(255,255,255,0.18));
+    -webkit-backdrop-filter: blur(18px) saturate(1.7);
+    backdrop-filter: blur(18px) saturate(1.7);
+    border: 1px solid rgba(255,255,255,0.7);
+    box-shadow: 0 8px 28px rgba(236,72,153,0.18), inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -1px 0 rgba(255,255,255,0.3);
+}
+header, .search-container { border-width: 0 0 1px 0; border-radius: 0; }
+.video-card, .help-box, .box, .item { border-radius: 16px; }
+
+/* pantulan miring di kartu video */
+.video-card { position: relative; }
+.video-card::after {
+    content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+    background: linear-gradient(115deg, rgba(255,255,255,0.34) 0%, rgba(255,255,255,0.08) 32%, rgba(255,255,255,0) 52%);
+}
+
+/* --- Kolom isian: kaca cekung --- */
+.search-box, input[type=text], input[type=url], input[type=password], select {
+    background: linear-gradient(180deg, rgba(255,255,255,0.35), rgba(255,255,255,0.6));
+    border: 1px solid rgba(255,255,255,0.75);
+    box-shadow: inset 0 2px 6px rgba(236,72,153,0.14), 0 1px 0 rgba(255,255,255,0.8);
+}
+
+/* --- Tombol kecil dan label: kaca --- */
+.chip, .pg-btn.nav, .suggest button, .tag-links a, .pill, .action-btn-outline, .btn.secondary {
+    background: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(255,255,255,0.28));
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.8);
+    box-shadow: 0 3px 10px rgba(236,72,153,0.16), inset 0 1px 0 rgba(255,255,255,0.95);
+}
+
+/* --- Tombol utama / yang aktif: pink mengkilap --- */
+.btn, .chip.active, .pg-btn.active, .pill.cat, .tag-links a.cat {
+    background:
+        linear-gradient(180deg, rgba(255,255,255,0.62) 0%, rgba(255,255,255,0.12) 48%, rgba(255,255,255,0) 50%),
+        linear-gradient(180deg, #f9a8d4 0%, #ec4899 55%, #db2777 100%);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.55);
+    box-shadow: 0 6px 16px rgba(236,72,153,0.42), inset 0 1px 0 rgba(255,255,255,0.85), inset 0 -2px 4px rgba(157,23,77,0.35);
+    text-shadow: 0 1px 2px rgba(157,23,77,0.5);
+}
+.btn:hover { filter: brightness(1.06); }
+.btn.secondary { color: #be185d; text-shadow: none; }
+.pg-btn.active { border: 2px solid #000; box-shadow: 2px 2px 0 #000, inset 0 1px 0 rgba(255,255,255,0.85), inset 0 -2px 4px rgba(157,23,77,0.35); }
+
+/* --- Menu samping --- */
+html .menu-drawer {
+    background:
+        linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.1) 30%, rgba(255,255,255,0) 31%),
+        linear-gradient(160deg, rgba(255,247,251,0.82), rgba(253,230,243,0.7));
+    -webkit-backdrop-filter: blur(22px) saturate(1.7);
+    backdrop-filter: blur(22px) saturate(1.7);
+    border-left: 1px solid rgba(255,255,255,0.75);
+    box-shadow: -10px 0 34px rgba(236,72,153,0.28), inset 1px 0 0 rgba(255,255,255,0.9);
+}
+html .menu-item:hover, html .menu-item.active {
+    background: linear-gradient(180deg, rgba(255,255,255,0.75), rgba(251,207,232,0.55));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.95), 0 2px 8px rgba(236,72,153,0.15);
+}
+
+/* =================== MODE GELAP =================== */
+html[data-theme="dark"] header,
+html[data-theme="dark"] .search-container,
+html[data-theme="dark"] .video-card,
+html[data-theme="dark"] .help-box,
+html[data-theme="dark"] .box,
+html[data-theme="dark"] .item {
+    background:
+        linear-gradient(180deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.03) 42%, rgba(255,255,255,0) 43%),
+        linear-gradient(145deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03));
+    border-color: rgba(255,255,255,0.16);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1px 0 rgba(255,255,255,0.05);
+}
+html[data-theme="dark"] header, html[data-theme="dark"] .search-container { border-width: 0 0 1px 0; }
+html[data-theme="dark"] .video-card::after {
+    background: linear-gradient(115deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.03) 32%, rgba(255,255,255,0) 52%);
+}
+html[data-theme="dark"] .search-box,
+html[data-theme="dark"] input[type=text], html[data-theme="dark"] input[type=url],
+html[data-theme="dark"] input[type=password], html[data-theme="dark"] select {
+    background: linear-gradient(180deg, rgba(0,0,0,0.28), rgba(255,255,255,0.06));
+    border-color: rgba(255,255,255,0.16);
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.08);
+}
+html[data-theme="dark"] .chip, html[data-theme="dark"] .pg-btn.nav, html[data-theme="dark"] .suggest button,
+html[data-theme="dark"] .tag-links a, html[data-theme="dark"] .pill,
+html[data-theme="dark"] .action-btn-outline, html[data-theme="dark"] .btn.secondary {
+    background: linear-gradient(180deg, rgba(255,255,255,0.2), rgba(255,255,255,0.05));
+    border-color: rgba(255,255,255,0.2);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.28);
+}
+html[data-theme="dark"] .btn, html[data-theme="dark"] .chip.active, html[data-theme="dark"] .pg-btn.active,
+html[data-theme="dark"] .pill.cat, html[data-theme="dark"] .tag-links a.cat {
+    background:
+        linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.06) 48%, rgba(255,255,255,0) 50%),
+        linear-gradient(180deg, #f472b6 0%, #db2777 55%, #be185d 100%);
+    color: #fff;
+    border-color: rgba(255,255,255,0.4);
+    box-shadow: 0 6px 18px rgba(219,39,119,0.5), inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -2px 4px rgba(88,28,135,0.5);
+}
+html[data-theme="dark"] .pg-btn.active { border: 2px solid #000; box-shadow: 2px 2px 0 #000, inset 0 1px 0 rgba(255,255,255,0.6); }
+html[data-theme="dark"] .menu-drawer {
+    background:
+        linear-gradient(180deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.02) 30%, rgba(255,255,255,0) 31%),
+        linear-gradient(160deg, rgba(40,14,30,0.86), rgba(24,8,18,0.8));
+    border-left-color: rgba(255,255,255,0.16);
+    box-shadow: -10px 0 34px rgba(0,0,0,0.55), inset 1px 0 0 rgba(255,255,255,0.12);
+}
+html[data-theme="dark"] .menu-item:hover, html[data-theme="dark"] .menu-item.active {
+    background: linear-gradient(180deg, rgba(255,255,255,0.2), rgba(244,114,182,0.16));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.25);
+}

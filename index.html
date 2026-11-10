@@ -91,18 +91,21 @@
         html[data-theme="dark"] .pg-btn.nav { background: rgba(255,255,255,0.07); border-color: rgba(244,114,182,0.35); color: #f9a8d4; }
         html[data-theme="dark"] .pg-dots { color: #c98aa9; }
 
-        /* ===== Genre ===== */
-        .genre-bar { max-width: 1100px; margin: 0 auto; padding: 10px 12px 0; display: flex; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-        .genre-bar::-webkit-scrollbar { display: none; }
-        .genre-bar:empty { display: none; }
-        .chip { flex: 0 0 auto; border: 1px solid rgba(244,114,182,0.4); background: rgba(255,255,255,0.55); color: #be185d; border-radius: 16px; padding: 6px 14px; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+        /* ===== Tag ===== */
+        .tag-bar { max-width: 1100px; margin: 0 auto; padding: 10px 12px 0; display: flex; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+        .tag-bar::-webkit-scrollbar { display: none; }
+        .tag-bar:empty { display: none; }
+        .chip { text-transform: uppercase; flex: 0 0 auto; border: 1px solid rgba(244,114,182,0.4); background: rgba(255,255,255,0.55); color: #be185d; border-radius: 16px; padding: 6px 14px; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
         .chip.active { background: #ec4899; border-color: #ec4899; color: #fff; }
-        .card-genres { padding: 0 12px; display: flex; flex-wrap: wrap; gap: 4px; }
-        .pill { font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; background: rgba(244,114,182,0.18); color: #be185d; font-weight: 600; }
+        .card-tags { padding: 0 12px; display: flex; flex-wrap: wrap; gap: 4px; }
+        .pill.cat { background: #ec4899; color: #fff; }
+        .pill { text-transform: uppercase; font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; background: rgba(244,114,182,0.18); color: #be185d; font-weight: 600; }
         html[data-theme="dark"] .chip { background: rgba(255,255,255,0.07); border-color: rgba(244,114,182,0.35); color: #f9a8d4; }
         html[data-theme="dark"] .chip.active { background: #ec4899; border-color: #ec4899; color: #fff; }
+        html[data-theme="dark"] .pill.cat { background: #ec4899; color: #fff; }
         html[data-theme="dark"] .pill { background: rgba(244,114,182,0.2); color: #f9a8d4; }
     </style>
+    <link rel="stylesheet" href="glass.css">
 </head>
 <body>
 
@@ -119,7 +122,7 @@
         <input type="text" class="search-box" id="search-input" placeholder="Cari video...">
     </div>
 
-    <div class="genre-bar" id="genre-bar"></div>
+    <div class="tag-bar" id="tag-bar"></div>
 
     <div class="video-feed" id="video-list"></div>
     <nav class="pagination" id="pagination" aria-label="Halaman"></nav>
@@ -132,8 +135,11 @@
         const PER_PAGE = 10;
         const pagerEl = document.getElementById('pagination');
         let page = Math.max(1, parseInt(new URLSearchParams(location.search).get('page'), 10) || 1);
-        let genre = (new URLSearchParams(location.search).get('genre') || '').trim();
-        const barEl = document.getElementById('genre-bar');
+        const qsInit = new URLSearchParams(location.search);
+        let tag = (qsInit.get('tag') || qsInit.get('genre') || '').trim();
+        let category = CATEGORIES.find(c => c.toLowerCase() === (qsInit.get('kategori') || '').trim().toLowerCase()) || '';
+        if (category) tag = '';  // kategori dan tag tidak dipakai bersamaan
+        const barEl = document.getElementById('tag-bar');
 
         document.getElementById('search-btn').addEventListener('click', () => {
             document.getElementById('search-bar').classList.toggle('active');
@@ -151,11 +157,12 @@
                 listEl.appendChild(e);
                 return;
             }
-            const gl = genre.toLowerCase();
+            const gl = tag.toLowerCase();
             const videos = VIDEOS.filter(v => {
-                const gs = videoGenres(v);
+                const gs = videoTags(v);
+                if (category && videoCategory(v) !== category) return false;
                 if (gl && !gs.some(g => g.toLowerCase() === gl)) return false;
-                return !q || v.title.toLowerCase().includes(q) || gs.some(g => g.toLowerCase().includes(q));
+                return !q || v.title.toLowerCase().includes(q) || videoCategory(v).toLowerCase().includes(q) || gs.some(g => g.toLowerCase().includes(q));
             });
 
             if (!videos.length) {
@@ -198,11 +205,18 @@
                 item.append(' ' + formatDate(v.createdAt));
                 meta.appendChild(item);
 
-                const gs = videoGenres(v);
+                const gs = videoTags(v);
+                const cat = videoCategory(v);
                 a.append(thumb, title);
-                if (gs.length) {
+                if (cat || gs.length) {
                     const gw = document.createElement('div');
-                    gw.className = 'card-genres';
+                    gw.className = 'card-tags';
+                    if (cat) {
+                        const c = document.createElement('span');
+                        c.className = 'pill cat';
+                        c.textContent = cat;
+                        gw.appendChild(c);
+                    }
                     gs.slice(0, 3).forEach(g => {
                         const p = document.createElement('span');
                         p.className = 'pill';
@@ -218,51 +232,51 @@
             renderPager(totalPages, filter);
         }
 
-        // Dipakai oleh tombol genre di bawah header dan oleh menu garis tiga
-        function selectGenre(g, clearSearch) {
-            genre = g;
+        // Dipakai oleh tombol tag di bawah header dan oleh menu garis tiga
+        // type: 'home' | 'category' | 'tag'. Kategori dan tag tidak dipakai bersamaan.
+        function selectFilter(type, value) {
+            category = type === 'category' ? value : '';
+            tag = type === 'tag' ? value : '';
             page = 1;
-            if (clearSearch) { searchInput.value = ''; }
+            if (type === 'home') { searchInput.value = ''; }
             syncUrl();
-            renderGenreBar();
+            renderTagBar();
             render(searchInput.value);
-            setMenuData(VIDEOS, genre);
+            setMenuData(VIDEOS, { category, tag });
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function syncUrl() {
             const p = new URLSearchParams();
-            if (genre) p.set('genre', genre);
+            if (category) p.set('kategori', category);
+            if (tag) p.set('tag', tag);
             if (page > 1) p.set('page', page);
             const qs = p.toString();
             try { history.replaceState(null, '', qs ? '?' + qs : location.pathname); } catch (e) {}
         }
 
-        function renderGenreBar() {
+        function renderTagBar() {
             barEl.innerHTML = '';
             if (!VIDEOS) return;
             const count = new Map();
-            VIDEOS.forEach(v => videoGenres(v).forEach(g => {
+            VIDEOS.forEach(v => videoTags(v).forEach(g => {
                 const k = g.toLowerCase();
                 const cur = count.get(k) || { name: g, n: 0 };
                 cur.n++;
                 count.set(k, cur);
             }));
-            if (!count.size) return;
             const list = [...count.values()].sort((a, b) => b.n - a.n || a.name.localeCompare(b.name));
-            const mk = (label, value) => {
+            const mk = (label, type, value, on) => {
                 const b = document.createElement('button');
                 b.type = 'button';
-                const on = value.toLowerCase() === genre.toLowerCase();
                 b.className = 'chip' + (on ? ' active' : '');
                 b.textContent = label;
-                b.addEventListener('click', () => {
-                    selectGenre(on ? '' : value);
-                });
+                b.addEventListener('click', () => selectFilter(on ? 'home' : type, on ? '' : value));
                 return b;
             };
-            barEl.appendChild(mk('Semua', ''));
-            list.forEach(g => barEl.appendChild(mk(g.name, g.name)));
+            barEl.appendChild(mk('Semua', 'home', '', !category && !tag));
+            CATEGORIES.forEach(c => barEl.appendChild(mk(c, 'category', c, category === c)));
+            list.forEach(g => barEl.appendChild(mk(g.name, 'tag', g.name, g.name.toLowerCase() === tag.toLowerCase())));
         }
 
         function goPage(n, filter) {
@@ -317,9 +331,9 @@
 
         loadVideos().then(v => {
             VIDEOS = v;
-            renderGenreBar();
+            renderTagBar();
             render(searchInput.value);
-            setMenuData(VIDEOS, genre, g => selectGenre(g, g === ''));
+            setMenuData(VIDEOS, { category, tag }, selectFilter);
         });
     </script>
     <script>

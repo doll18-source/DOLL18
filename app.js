@@ -65,8 +65,8 @@ function initThemeToggle() {
 }
 initThemeToggle();
 
-// Genre: terima teks "a, b, c" atau array, kembalikan array bersih (maks 8, tiap genre maks 20 huruf)
-function parseGenres(input) {
+// Tag: terima teks "a, b, c" atau array, kembalikan array bersih (maks 8, tiap tag maks 20 huruf)
+function parseTags(input) {
     const arr = Array.isArray(input) ? input : String(input || '').split(/[,;\n]+/);
     const seen = new Set(), out = [];
     for (const g of arr) {
@@ -81,11 +81,21 @@ function parseGenres(input) {
     return out;
 }
 
-function videoGenres(v) {
-    return Array.isArray(v && v.genres) ? parseGenres(v.genres) : [];
+function videoTags(v) {
+    // baca "tags", dan tetap bisa baca data lama yang memakai nama "genres"
+    const raw = v && (Array.isArray(v.tags) ? v.tags : v.genres);
+    return Array.isArray(raw) ? parseTags(raw) : [];
 }
 
-// ===== Menu garis tiga: Home + daftar Genre =====
+// Kategori utama (urutan = urutan di menu). Mau tambah kategori? Tambahkan namanya di sini.
+const CATEGORIES = ['INDO', 'VIRAL', 'JAV'];
+
+function videoCategory(v) {
+    const c = String((v && v.category) || '').trim().toLowerCase();
+    return CATEGORIES.find(x => x.toLowerCase() === c) || '';
+}
+
+// ===== Menu garis tiga: Home + Kategori + daftar Tag =====
 const MENU_CSS = `
 .menu-overlay { position: fixed; inset: 0; background: rgba(60,20,40,0.35); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); opacity: 0; pointer-events: none; transition: opacity .25s; z-index: 200; }
 .menu-overlay.open { opacity: 1; pointer-events: auto; }
@@ -99,21 +109,24 @@ const MENU_CSS = `
 .menu-item .lead { width: 22px; text-align: center; color: #ec4899; }
 .menu-item .chev { margin-left: auto; font-size: .8rem; transition: transform .2s; }
 .menu-item[aria-expanded="true"] .chev { transform: rotate(180deg); }
-.menu-genres { display: none; padding: 2px 0 6px 18px; }
-.menu-genres.open { display: block; }
-.menu-genre { font-size: .93rem; font-weight: 500; padding: 11px 14px; }
-.menu-genre .n { margin-left: auto; font-size: .72rem; font-weight: 700; background: rgba(244,114,182,0.2); color: #be185d; padding: 1px 9px; border-radius: 10px; }
+.menu-tags { display: none; padding: 2px 0 6px 18px; }
+.menu-tags.open { display: block; }
+.menu-tag { text-transform: uppercase; font-size: .88rem; font-weight: 500; padding: 11px 14px; }
+.menu-tag .n { margin-left: auto; font-size: .72rem; font-weight: 700; background: rgba(244,114,182,0.2); color: #be185d; padding: 1px 9px; border-radius: 10px; }
+.menu-cat { text-transform: uppercase; }
+.menu-cat .n { margin-left: auto; font-size: .72rem; font-weight: 700; background: rgba(244,114,182,0.2); color: #be185d; padding: 1px 9px; border-radius: 10px; }
 .menu-empty { padding: 10px 14px; font-size: .85rem; color: #b0457a; }
 html[data-theme="dark"] .menu-drawer { background: rgba(30,12,22,0.97); border-left-color: rgba(244,114,182,0.25); box-shadow: -8px 0 30px rgba(0,0,0,0.5); }
 html[data-theme="dark"] .menu-head { border-bottom-color: rgba(244,114,182,0.2); color: #f472b6; }
 html[data-theme="dark"] .menu-close { color: #f9a8d4; }
 html[data-theme="dark"] .menu-item { color: #f1d3e2; }
 html[data-theme="dark"] .menu-item:hover, html[data-theme="dark"] .menu-item.active { background: rgba(244,114,182,0.18); color: #f9a8d4; }
-html[data-theme="dark"] .menu-genre .n { background: rgba(244,114,182,0.2); color: #f9a8d4; }
+html[data-theme="dark"] .menu-cat .n, html[data-theme="dark"] .menu-tag .n { background: rgba(244,114,182,0.2); color: #f9a8d4; }
 html[data-theme="dark"] .menu-empty { color: #c98aa9; }
 `;
 
-const menuState = { videos: [], active: null, onPick: null, open: false, genresOpen: false };
+const menuState = { videos: [], active: null, onPick: null, open: false, tagsOpen: true };
+// active = { category: '', tag: '' } di halaman daftar, atau null di halaman lain
 let menuEls = null;
 
 function openMenu(open) {
@@ -125,12 +138,17 @@ function openMenu(open) {
     document.body.style.overflow = open ? 'hidden' : '';
 }
 
-function pickGenre(g) {
+// type: 'home' | 'category' | 'tag'
+function pickMenu(type, value) {
     openMenu(false);
     if (menuState.onPick) {
-        menuState.onPick(g);
+        menuState.onPick(type, value);
+    } else if (type === 'category') {
+        location.href = 'index.html?kategori=' + encodeURIComponent(value);
+    } else if (type === 'tag') {
+        location.href = 'index.html?tag=' + encodeURIComponent(value);
     } else {
-        location.href = g ? 'index.html?genre=' + encodeURIComponent(g) : 'index.html';
+        location.href = 'index.html';
     }
 }
 
@@ -141,29 +159,48 @@ function renderMenu() {
 
     // Home = tampilkan semua video
     const home = document.createElement('a');
-    home.className = 'menu-item' + (menuState.active === '' ? ' active' : '');
+    const act = menuState.active;
+    home.className = 'menu-item' + (act && !act.category && !act.tag ? ' active' : '');
     home.href = 'index.html';
     home.innerHTML = '<i class="fas fa-house lead"></i><span>Home</span>';
-    home.addEventListener('click', e => { if (menuState.onPick) { e.preventDefault(); pickGenre(''); } });
+    home.addEventListener('click', e => { if (menuState.onPick) { e.preventDefault(); pickMenu('home', ''); } });
     body.appendChild(home);
 
-    // Genre = daftar genre yang ada (buka/tutup)
+    // Kategori: INDO, VIRAL, JAV
+    const catCount = {};
+    (menuState.videos || []).forEach(v => { const c = videoCategory(v); if (c) catCount[c] = (catCount[c] || 0) + 1; });
+    CATEGORIES.forEach(c => {
+        const el = document.createElement('a');
+        el.className = 'menu-item menu-cat' + (act && act.category === c ? ' active' : '');
+        el.href = 'index.html?kategori=' + encodeURIComponent(c);
+        const name = document.createElement('span');
+        name.textContent = c;
+        const n = document.createElement('span');
+        n.className = 'n';
+        n.textContent = catCount[c] || 0;
+        el.innerHTML = '<i class="fas fa-folder lead"></i>';
+        el.append(name, n);
+        el.addEventListener('click', e => { if (menuState.onPick) { e.preventDefault(); pickMenu('category', c); } });
+        body.appendChild(el);
+    });
+
+    // Tag = daftar tag yang ada (buka/tutup)
     const gbtn = document.createElement('button');
     gbtn.type = 'button';
     gbtn.className = 'menu-item';
-    gbtn.setAttribute('aria-expanded', menuState.genresOpen ? 'true' : 'false');
-    gbtn.innerHTML = '<i class="fas fa-tags lead"></i><span>Genre</span><i class="fas fa-chevron-down chev"></i>';
+    gbtn.setAttribute('aria-expanded', menuState.tagsOpen ? 'true' : 'false');
+    gbtn.innerHTML = '<i class="fas fa-tags lead"></i><span>Tag</span><i class="fas fa-chevron-down chev"></i>';
     const list = document.createElement('div');
-    list.className = 'menu-genres' + (menuState.genresOpen ? ' open' : '');
+    list.className = 'menu-tags' + (menuState.tagsOpen ? ' open' : '');
     gbtn.addEventListener('click', () => {
-        menuState.genresOpen = !menuState.genresOpen;
-        gbtn.setAttribute('aria-expanded', menuState.genresOpen ? 'true' : 'false');
-        list.classList.toggle('open', menuState.genresOpen);
+        menuState.tagsOpen = !menuState.tagsOpen;
+        gbtn.setAttribute('aria-expanded', menuState.tagsOpen ? 'true' : 'false');
+        list.classList.toggle('open', menuState.tagsOpen);
     });
     body.append(gbtn, list);
 
     const count = new Map();
-    (menuState.videos || []).forEach(v => videoGenres(v).forEach(g => {
+    (menuState.videos || []).forEach(v => videoTags(v).forEach(g => {
         const k = g.toLowerCase();
         const cur = count.get(k) || { name: g, n: 0 };
         cur.n++;
@@ -173,32 +210,32 @@ function renderMenu() {
     if (!items.length) {
         const e = document.createElement('div');
         e.className = 'menu-empty';
-        e.textContent = 'Belum ada genre.';
+        e.textContent = 'Belum ada tag.';
         list.appendChild(e);
     }
     items.forEach(g => {
         const a = document.createElement('a');
-        const on = menuState.active && menuState.active.toLowerCase() === g.name.toLowerCase();
-        a.className = 'menu-item menu-genre' + (on ? ' active' : '');
-        a.href = 'index.html?genre=' + encodeURIComponent(g.name);
+        const on = act && act.tag && act.tag.toLowerCase() === g.name.toLowerCase();
+        a.className = 'menu-item menu-tag' + (on ? ' active' : '');
+        a.href = 'index.html?tag=' + encodeURIComponent(g.name);
         const name = document.createElement('span');
         name.textContent = g.name;
         const n = document.createElement('span');
         n.className = 'n';
         n.textContent = g.n;
         a.append(name, n);
-        a.addEventListener('click', e => { if (menuState.onPick) { e.preventDefault(); pickGenre(g.name); } });
+        a.addEventListener('click', e => { if (menuState.onPick) { e.preventDefault(); pickMenu('tag', g.name); } });
         list.appendChild(a);
     });
 }
 
-// videos: daftar video; active: genre yang sedang dipilih ('' = semua, null = bukan halaman daftar);
-// onPick(genre): dipanggil saat Home/genre diketuk (kalau kosong, pindah ke index.html)
+// videos: daftar video; active: { category, tag } yang sedang dipilih (null = bukan halaman daftar);
+// onPick(type, value): dipanggil saat Home/kategori/tag diketuk (kalau kosong, pindah ke index.html)
 function setMenuData(videos, active, onPick) {
     menuState.videos = videos || [];
     menuState.active = active;
     if (onPick) menuState.onPick = onPick;
-    if (active) menuState.genresOpen = true; // genre aktif langsung terlihat
+    if (active && active.tag) menuState.tagsOpen = true; // tag aktif langsung terlihat
     renderMenu();
 }
 
