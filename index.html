@@ -111,6 +111,7 @@
         <div class="header-icons">
             <i class="fas fa-sun" id="theme-btn" title="Ganti tema"></i>
             <i class="fas fa-search" id="search-btn"></i>
+            <i class="fas fa-bars" id="menu-btn" title="Menu" role="button" aria-label="Menu"></i>
         </div>
     </header>
 
@@ -217,6 +218,18 @@
             renderPager(totalPages, filter);
         }
 
+        // Dipakai oleh tombol genre di bawah header dan oleh menu garis tiga
+        function selectGenre(g, clearSearch) {
+            genre = g;
+            page = 1;
+            if (clearSearch) { searchInput.value = ''; }
+            syncUrl();
+            renderGenreBar();
+            render(searchInput.value);
+            setMenuData(VIDEOS, genre);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
         function syncUrl() {
             const p = new URLSearchParams();
             if (genre) p.set('genre', genre);
@@ -244,11 +257,7 @@
                 b.className = 'chip' + (on ? ' active' : '');
                 b.textContent = label;
                 b.addEventListener('click', () => {
-                    genre = on ? '' : value;
-                    page = 1;
-                    syncUrl();
-                    renderGenreBar();
-                    render(searchInput.value);
+                    selectGenre(on ? '' : value);
                 });
                 return b;
             };
@@ -306,7 +315,12 @@
         // Ketuk logo DOLL18 sekali untuk membuka halaman upload
         document.querySelector('.logo').setAttribute('href', 'upload.html');
 
-        loadVideos().then(v => { VIDEOS = v; renderGenreBar(); render(searchInput.value); });
+        loadVideos().then(v => {
+            VIDEOS = v;
+            renderGenreBar();
+            render(searchInput.value);
+            setMenuData(VIDEOS, genre, g => selectGenre(g, g === ''));
+        });
     </script>
     <script>
         if ('serviceWorker' in navigator) {
