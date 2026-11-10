@@ -1,0 +1,57 @@
+/* ===== Tampilan solid & ringan =====
+   Tanpa transparan, tanpa efek kaca buram, tanpa gradasi. Dimuat setelah <style> di tiap halaman. */
+
+/* matikan semua efek buram (paling berat di HP) */
+* { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+
+/* --- Latar --- */
+body { background: #fff5f9 !important; color: #5b2a45; }
+
+/* --- Header & logo --- */
+header { background: #fff0f6; border-bottom: 1px solid #f9a8d4; box-shadow: none; }
+.logo { background: url(logo-bg.png) right center / auto 100% no-repeat !important; }
+.search-container { background: #ffe4ef; border-bottom: 1px solid #f9a8d4; box-shadow: none; }
+
+/* --- Kartu & kotak --- */
+.video-card, .help-box, .box, .item { background: #fff; border: 1px solid #f9a8d4; box-shadow: none; border-radius: 12px; }
+.video-card::after { display: none; }
+.thumbnail-container, .preview { background: #fce7f3; }
+
+/* --- Kolom isian --- */
+.search-box, input[type=text], input[type=url], input[type=password], select { background: #fff; border: 1px solid #f472b6; box-shadow: none; }
+
+/* --- Tombol kecil & label --- */
+.chip, .pg-btn.nav, .suggest button, .tag-links a, .pill, .action-btn-outline, .btn.secondary { background: #fff; border: 1px solid #f9a8d4; box-shadow: none; }
+.pill { background: #fce7f3; border-color: #fce7f3; }
+
+/* --- Tombol utama / aktif: pink polos --- */
+.btn, .chip.active, .pg-btn.active, .pill.cat, .tag-links a.cat { background: #ec4899; color: #fff; border: 1px solid #ec4899; box-shadow: none; text-shadow: none; }
+.btn:hover { background: #db2777; filter: none; }
+.btn.secondary { color: #be185d; }
+.pg-btn.active { border: 2px solid #000; box-shadow: 2px 2px 0 #000; }
+
+/* --- Menu samping --- */
+html .menu-overlay { background: rgba(60,20,40,0.45); }
+html .menu-drawer { background: #fff7fb; border-left: 1px solid #f9a8d4; box-shadow: -4px 0 14px rgba(0,0,0,0.12); }
+html .menu-item:hover, html .menu-item.active { background: #fce7f3; box-shadow: none; }
+
+/* =================== MODE GELAP =================== */
+html[data-theme="dark"] body { background: #170a11 !important; color: #f6dbe8; }
+html[data-theme="dark"] header { background: #22101a; border-bottom: 1px solid #4a2538; box-shadow: none; }
+html[data-theme="dark"] .logo { background: url(logo-bg.png) right center / auto 100% no-repeat !important; }
+html[data-theme="dark"] .search-container { background: #1d0e16; border-bottom: 1px solid #4a2538; box-shadow: none; }
+html[data-theme="dark"] .video-card, html[data-theme="dark"] .help-box,
+html[data-theme="dark"] .box, html[data-theme="dark"] .item { background: #2a1421; border: 1px solid #4a2538; box-shadow: none; }
+html[data-theme="dark"] .video-card::after { display: none; }
+html[data-theme="dark"] .thumbnail-container, html[data-theme="dark"] .preview { background: #3a1c2d; }
+html[data-theme="dark"] .search-box, html[data-theme="dark"] input[type=text], html[data-theme="dark"] input[type=url],
+html[data-theme="dark"] input[type=password], html[data-theme="dark"] select { background: #1c0d15; border: 1px solid #5a2d44; box-shadow: none; color: #f6dbe8; }
+html[data-theme="dark"] .chip, html[data-theme="dark"] .pg-btn.nav, html[data-theme="dark"] .suggest button,
+html[data-theme="dark"] .tag-links a, html[data-theme="dark"] .action-btn-outline,
+html[data-theme="dark"] .btn.secondary { background: #2a1421; border: 1px solid #5a2d44; box-shadow: none; }
+html[data-theme="dark"] .pill { background: #3a1c2d; border-color: #3a1c2d; }
+html[data-theme="dark"] .btn, html[data-theme="dark"] .chip.active, html[data-theme="dark"] .pg-btn.active,
+html[data-theme="dark"] .pill.cat, html[data-theme="dark"] .tag-links a.cat { background: #ec4899; color: #fff; border-color: #ec4899; box-shadow: none; text-shadow: none; }
+html[data-theme="dark"] .pg-btn.active { border: 2px solid #000; box-shadow: 2px 2px 0 #000; }
+html[data-theme="dark"] .menu-drawer { background: #1f0e17; border-left: 1px solid #4a2538; box-shadow: -4px 0 14px rgba(0,0,0,0.5); }
+html[data-theme="dark"] .menu-item:hover, html[data-theme="dark"] .menu-item.active { background: #3a1c2d; box-shadow: none; }
