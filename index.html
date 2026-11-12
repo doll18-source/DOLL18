@@ -205,24 +205,15 @@
                 item.append(' ' + formatDate(v.createdAt));
                 meta.appendChild(item);
 
-                const gs = videoTags(v);
                 const cat = videoCategory(v);
                 a.append(thumb, title);
-                if (cat || gs.length) {
+                if (cat) {   // hanya kategori yang tampil di kartu; tag ada di halaman Tag
                     const gw = document.createElement('div');
                     gw.className = 'card-tags';
-                    if (cat) {
-                        const c = document.createElement('span');
-                        c.className = 'pill cat';
-                        c.textContent = cat;
-                        gw.appendChild(c);
-                    }
-                    gs.slice(0, 3).forEach(g => {
-                        const p = document.createElement('span');
-                        p.className = 'pill';
-                        p.textContent = g;
-                        gw.appendChild(p);
-                    });
+                    const c = document.createElement('span');
+                    c.className = 'pill cat';
+                    c.textContent = cat;
+                    gw.appendChild(c);
                     a.appendChild(gw);
                 }
                 a.appendChild(meta);
@@ -258,14 +249,6 @@
         function renderTagBar() {
             barEl.innerHTML = '';
             if (!VIDEOS) return;
-            const count = new Map();
-            VIDEOS.forEach(v => videoTags(v).forEach(g => {
-                const k = g.toLowerCase();
-                const cur = count.get(k) || { name: g, n: 0 };
-                cur.n++;
-                count.set(k, cur);
-            }));
-            const list = [...count.values()].sort((a, b) => b.n - a.n || a.name.localeCompare(b.name));
             const mk = (label, type, value, on) => {
                 const b = document.createElement('button');
                 b.type = 'button';
@@ -276,7 +259,16 @@
             };
             barEl.appendChild(mk('Semua', 'home', '', !category && !tag));
             CATEGORIES.forEach(c => barEl.appendChild(mk(c, 'category', c, category === c)));
-            list.forEach(g => barEl.appendChild(mk(g.name, 'tag', g.name, g.name.toLowerCase() === tag.toLowerCase())));
+            // Tag tidak ditampilkan di beranda. Kalau sedang menyaring dengan tag, tampilkan satu tombol untuk membatalkannya.
+            if (tag) {
+                const t = document.createElement('button');
+                t.type = 'button';
+                t.className = 'chip active';
+                t.textContent = '# ' + tag + '  \u2715';
+                t.title = 'Batalkan filter tag';
+                t.addEventListener('click', () => selectFilter('tag', ''));
+                barEl.appendChild(t);
+            }
         }
 
         function goPage(n, filter) {

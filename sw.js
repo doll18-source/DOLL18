@@ -1,7 +1,7 @@
 // Service worker: bikin web bisa di-install, dan semua gambar (thumbnail) ikut tersimpan di HP.
-const CACHE = 'doll18-v3';
+const CACHE = 'doll18-v4';
 const SHELL = [
-  './', 'index.html', 'watch.html', 'app.js', 'manifest.json',
+  './', 'index.html', 'watch.html', 'tags.html', 'app.js', 'manifest.json',
   'icon-192.png', 'icon-512.png', 'logo-bg.png', 'solid.css'
 ];
 

@@ -114,6 +114,7 @@ const MENU_CSS = `
 .menu-tag { text-transform: uppercase; font-size: .88rem; font-weight: 500; padding: 11px 14px; }
 .menu-tag .n { margin-left: auto; font-size: .72rem; font-weight: 700; background: rgba(244,114,182,0.2); color: #be185d; padding: 1px 9px; border-radius: 10px; }
 .menu-cat { text-transform: uppercase; }
+.menu-item > .n { margin-left: auto; font-size: .72rem; font-weight: 700; background: rgba(244,114,182,0.2); color: #be185d; padding: 1px 9px; border-radius: 10px; }
 .menu-cat .n { margin-left: auto; font-size: .72rem; font-weight: 700; background: rgba(244,114,182,0.2); color: #be185d; padding: 1px 9px; border-radius: 10px; }
 .menu-empty { padding: 10px 14px; font-size: .85rem; color: #b0457a; }
 html[data-theme="dark"] .menu-drawer { background: rgba(30,12,22,0.97); border-left-color: rgba(244,114,182,0.25); box-shadow: -8px 0 30px rgba(0,0,0,0.5); }
@@ -121,7 +122,7 @@ html[data-theme="dark"] .menu-head { border-bottom-color: rgba(244,114,182,0.2);
 html[data-theme="dark"] .menu-close { color: #f9a8d4; }
 html[data-theme="dark"] .menu-item { color: #f1d3e2; }
 html[data-theme="dark"] .menu-item:hover, html[data-theme="dark"] .menu-item.active { background: rgba(244,114,182,0.18); color: #f9a8d4; }
-html[data-theme="dark"] .menu-cat .n, html[data-theme="dark"] .menu-tag .n { background: rgba(244,114,182,0.2); color: #f9a8d4; }
+html[data-theme="dark"] .menu-item > .n, html[data-theme="dark"] .menu-cat .n, html[data-theme="dark"] .menu-tag .n { background: rgba(244,114,182,0.2); color: #f9a8d4; }
 html[data-theme="dark"] .menu-empty { color: #c98aa9; }
 `;
 
@@ -184,49 +185,20 @@ function renderMenu() {
         body.appendChild(el);
     });
 
-    // Tag = daftar tag yang ada (buka/tutup)
-    const gbtn = document.createElement('button');
-    gbtn.type = 'button';
-    gbtn.className = 'menu-item';
-    gbtn.setAttribute('aria-expanded', menuState.tagsOpen ? 'true' : 'false');
-    gbtn.innerHTML = '<i class="fas fa-tags lead"></i><span>Tag</span><i class="fas fa-chevron-down chev"></i>';
-    const list = document.createElement('div');
-    list.className = 'menu-tags' + (menuState.tagsOpen ? ' open' : '');
-    gbtn.addEventListener('click', () => {
-        menuState.tagsOpen = !menuState.tagsOpen;
-        gbtn.setAttribute('aria-expanded', menuState.tagsOpen ? 'true' : 'false');
-        list.classList.toggle('open', menuState.tagsOpen);
-    });
-    body.append(gbtn, list);
-
-    const count = new Map();
-    (menuState.videos || []).forEach(v => videoTags(v).forEach(g => {
-        const k = g.toLowerCase();
-        const cur = count.get(k) || { name: g, n: 0 };
-        cur.n++;
-        count.set(k, cur);
-    }));
-    const items = [...count.values()].sort((x, y) => y.n - x.n || x.name.localeCompare(y.name));
-    if (!items.length) {
-        const e = document.createElement('div');
-        e.className = 'menu-empty';
-        e.textContent = 'Belum ada tag.';
-        list.appendChild(e);
-    }
-    items.forEach(g => {
-        const a = document.createElement('a');
-        const on = act && act.tag && act.tag.toLowerCase() === g.name.toLowerCase();
-        a.className = 'menu-item menu-tag' + (on ? ' active' : '');
-        a.href = 'index.html?tag=' + encodeURIComponent(g.name);
-        const name = document.createElement('span');
-        name.textContent = g.name;
-        const n = document.createElement('span');
-        n.className = 'n';
-        n.textContent = g.n;
-        a.append(name, n);
-        a.addEventListener('click', e => { if (menuState.onPick) { e.preventDefault(); pickMenu('tag', g.name); } });
-        list.appendChild(a);
-    });
+    // Tag = menuju halaman daftar semua tag (tags.html)
+    const tagSet = new Set();
+    (menuState.videos || []).forEach(v => videoTags(v).forEach(g => tagSet.add(g.toLowerCase())));
+    const tagLink = document.createElement('a');
+    tagLink.className = 'menu-item' + (/tags\.html$/.test(location.pathname) ? ' active' : '');
+    tagLink.href = 'tags.html';
+    tagLink.innerHTML = '<i class="fas fa-tags lead"></i>';
+    const tName = document.createElement('span');
+    tName.textContent = 'Tag';
+    const tN = document.createElement('span');
+    tN.className = 'n';
+    tN.textContent = tagSet.size;
+    tagLink.append(tName, tN);
+    body.appendChild(tagLink);
 }
 
 // videos: daftar video; active: { category, tag } yang sedang dipilih (null = bukan halaman daftar);
@@ -235,7 +207,6 @@ function setMenuData(videos, active, onPick) {
     menuState.videos = videos || [];
     menuState.active = active;
     if (onPick) menuState.onPick = onPick;
-    if (active && active.tag) menuState.tagsOpen = true; // tag aktif langsung terlihat
     renderMenu();
 }
 

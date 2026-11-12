@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        (function () {
+            try {
+                var t = localStorage.getItem('theme');
+                if (t === 'dark') {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    var m = document.querySelector('meta[name="theme-color"]');
+                    if (m) m.setAttribute('content', '#210d19');
+                }
+            } catch (e) {}
+        })();
+    </script>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ffe9f2">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="DOLL18">
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <title>Doll18 - Tag</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background: linear-gradient(160deg,#fff7fb 0%,#ffe9f2 50%,#fdf2f8 100%) fixed; min-height: 100vh; color: #5b2a45; padding-bottom: 40px; }
+
+        header { position: sticky; top: 0; background-color: rgba(255,255,255,0.55); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid rgba(244,114,182,0.25); z-index: 100; }
+        .logo { font-size: 1.8rem; font-weight: 900; letter-spacing: 2px; color: #db2777; text-decoration: none; display: inline-block; padding: 8px 90px 8px 14px; border-radius: 12px; line-height: 1.1; -webkit-text-stroke: 3px #000; paint-order: stroke fill; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; background: linear-gradient(90deg, rgba(255,240,246,0.92) 0%, rgba(255,240,246,0.55) 45%, rgba(255,240,246,0) 100%), url(logo-bg.png) right center / auto 100% no-repeat; }
+        .header-icons i { font-size: 1.1rem; color: #ec4899; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; min-width: 44px; height: 44px; }
+        .header-icons a { font-size: 1.1rem; color: #ec4899; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; min-width: 44px; height: 44px; }
+
+        .main-container { max-width: 900px; margin: 0 auto; padding: 12px; }
+        @media (min-width: 700px) { .main-container { padding: 20px; } }
+        .video-title { font-size: clamp(1.05rem, 2.5vw, 1.4rem); font-weight: bold; margin-bottom: 8px; line-height: 1.3; overflow-wrap: anywhere; }
+
+        .player-wrapper { position: relative; width: 100%; background-color: #000; border-radius: 8px; overflow: hidden; margin-bottom: 12px; aspect-ratio: 16/9; }
+        .player-wrapper iframe { width: 100%; height: 100%; border: none; }
+
+        .actions-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .action-btn-outline { background: transparent; border: 1px solid rgba(244,114,182,0.45); color: #be185d; padding: 11px 18px; border-radius: 20px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; text-decoration: none; }
+        .action-btn-outline:hover { border-color: #f472b6; background-color: rgba(251,207,232,0.4); }
+
+        .publish-info { display: flex; flex-wrap: wrap; gap: 15px; font-size: 0.8rem; color: #b0457a; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid rgba(244,114,182,0.25); }
+        .publish-info span { display: flex; align-items: center; gap: 5px; }
+        .notfound { text-align: center; color: #b0457a; padding: 60px 0; }
+        .notfound a { color: #be185d; }
+
+        /* ===== Mode gelap ===== */
+        html[data-theme="dark"] body { background: linear-gradient(160deg,#16080f 0%,#210d19 50%,#180a12 100%) fixed; color: #f6dbe8; }
+        html[data-theme="dark"] header { background-color: rgba(34,14,25,0.6); border-bottom-color: rgba(244,114,182,0.2); }
+        html[data-theme="dark"] .logo { color: #f472b6; background: linear-gradient(90deg, rgba(58,22,41,0.92) 0%, rgba(58,22,41,0.55) 45%, rgba(58,22,41,0) 100%), url(logo-bg.png) right center / auto 100% no-repeat; }
+        html[data-theme="dark"] .header-icons i, html[data-theme="dark"] .header-icons a { color: #f9a8d4; }
+        html[data-theme="dark"] .search-container { background-color: rgba(34,14,25,0.55); border-bottom-color: rgba(244,114,182,0.2); }
+        html[data-theme="dark"] .search-box, html[data-theme="dark"] input[type=text], html[data-theme="dark"] input[type=url], html[data-theme="dark"] input[type=password] { background-color: rgba(255,255,255,0.07); border-color: rgba(244,114,182,0.3); color: #f6dbe8; }
+        html[data-theme="dark"] .search-box::placeholder, html[data-theme="dark"] input::placeholder { color: #a8738c; }
+        html[data-theme="dark"] .video-card, html[data-theme="dark"] .box, html[data-theme="dark"] .item { background-color: rgba(255,255,255,0.06); border-color: rgba(244,114,182,0.2); box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+        html[data-theme="dark"] .thumbnail-container, html[data-theme="dark"] .preview { background-color: rgba(244,114,182,0.1); }
+        html[data-theme="dark"] .video-meta, html[data-theme="dark"] .empty, html[data-theme="dark"] .publish-info { color: #c98aa9; }
+        html[data-theme="dark"] .publish-info { border-bottom-color: rgba(244,114,182,0.2); }
+        html[data-theme="dark"] .action-btn-outline, html[data-theme="dark"] .notfound a, html[data-theme="dark"] .btn.secondary { color: #f9a8d4; border-color: rgba(244,114,182,0.4); }
+        html[data-theme="dark"] .action-btn-outline:hover, html[data-theme="dark"] .btn.secondary:hover, html[data-theme="dark"] .item button:hover { background-color: rgba(244,114,182,0.15); }
+        html[data-theme="dark"] label, html[data-theme="dark"] summary { color: #e9a3c4 !important; }
+        html[data-theme="dark"] h2 { color: #f9a8d4; }
+        html[data-theme="dark"] .box, html[data-theme="dark"] input[type=file] { color: #e8c3d5; }
+        html[data-theme="dark"] .box code { background: rgba(244,114,182,0.15); }
+        html[data-theme="dark"] .msg.ok, html[data-theme="dark"] .item .new { color: #4ade80; }
+        html[data-theme="dark"] .msg.err { color: #fb7185; }
+        html[data-theme="dark"] .item button { color: #fb7185; border-color: rgba(244,114,182,0.3); }
+        html[data-theme="dark"] a[style*="color:#db2777"] { color: #f9a8d4 !important; }
+        #theme-btn { transition: transform 0.3s; }
+        #theme-btn:active { transform: rotate(40deg) scale(0.9); }
+
+        .help-box { margin-bottom: 14px; border-radius: 12px; border: 1px solid rgba(244,114,182,0.3); background: rgba(255,255,255,0.55); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); font-size: 0.85rem; line-height: 1.55; color: #6b2145; }
+        .help-box summary { cursor: pointer; padding: 12px 14px; font-weight: 600; color: #be185d; list-style: none; display: flex; align-items: center; gap: 8px; }
+        .help-box summary::-webkit-details-marker { display: none; }
+        .help-box summary::after { content: '\25BE'; margin-left: auto; transition: transform 0.2s; }
+        .help-box[open] summary::after { transform: rotate(180deg); }
+        .help-body { padding: 0 14px 14px; }
+        .help-body ul { padding-left: 18px; margin: 6px 0 10px; }
+        .help-body li { margin-bottom: 4px; }
+        .help-body code { background: rgba(244,114,182,0.18); padding: 1px 6px; border-radius: 4px; font-size: 0.8rem; }
+        .help-body .action-btn-outline { margin-top: 4px; }
+        html[data-theme="dark"] .help-box { background: rgba(255,255,255,0.06); border-color: rgba(244,114,182,0.25); color: #e8c3d5; }
+        html[data-theme="dark"] .help-box summary { color: #f9a8d4; }
+        html[data-theme="dark"] .help-body code { background: rgba(244,114,182,0.18); }
+
+        .tag-links { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+        .tag-links a { text-transform: uppercase; font-size: 0.8rem; font-weight: 600; padding: 5px 12px; border-radius: 14px; background: rgba(244,114,182,0.18); color: #be185d; text-decoration: none; border: 1px solid rgba(244,114,182,0.3); }
+        .tag-links a.cat { background: #ec4899; color: #fff; border-color: #ec4899; }
+        .tag-links a:hover { background: rgba(244,114,182,0.3); }
+        html[data-theme="dark"] .tag-links a.cat { background: #ec4899; color: #fff; border-color: #ec4899; }
+        html[data-theme="dark"] .tag-links a { background: rgba(244,114,182,0.2); color: #f9a8d4; border-color: rgba(244,114,182,0.3); }
+
+        /* ===== Halaman Tag ===== */
+        .page-title { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-left: 5px solid #ec4899; background: #fff; border-radius: 0 10px 10px 0; font-size: 1.2rem; font-weight: 800; color: #be185d; margin-bottom: 14px; }
+        .tag-search { width: 100%; padding: 10px 14px; border-radius: 20px; border: 1px solid #f472b6; background: #fff; color: #5b2a45; font-size: 1rem; outline: none; margin-bottom: 16px; }
+        .tag-cloud { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+        .tag-cloud a { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; text-transform: uppercase; font-weight: 700; color: #be185d; background: #fff; border: 1px solid #f9a8d4; border-radius: 10px; }
+        .tag-cloud a i { color: #ec4899; font-size: 0.85em; }
+        .tag-cloud a .n { font-size: 0.7em; font-weight: 700; background: #fce7f3; color: #be185d; padding: 1px 8px; border-radius: 10px; }
+        .tag-cloud a:active { transform: scale(0.97); }
+        .tag-cloud .empty { color: #b0457a; font-size: 0.9rem; padding: 20px 0; }
+        html[data-theme="dark"] .page-title { background: #2a1421; color: #f9a8d4; }
+        html[data-theme="dark"] .tag-cloud a { background: #2a1421; border-color: #4a2538; color: #f3c4da; }
+        html[data-theme="dark"] .tag-cloud a i { color: #f472b6; }
+        html[data-theme="dark"] .tag-cloud a .n { background: #3a1c2d; color: #f9a8d4; }
+        html[data-theme="dark"] .tag-cloud .empty { color: #c98aa9; }
+    </style>
+    <link rel="stylesheet" href="solid.css">
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="logo">DOLL18</a>
+        <div class="header-icons">
+            <i class="fas fa-sun" id="theme-btn" title="Ganti tema"></i>
+            <i class="fas fa-bars" id="menu-btn" title="Menu" role="button" aria-label="Menu"></i>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <h1 class="page-title"><i class="fas fa-tags"></i> Tag</h1>
+        <input type="text" class="tag-search" id="tag-search" placeholder="Cari tag..." autocomplete="off">
+        <div class="tag-cloud" id="tag-cloud"></div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        const cloud = document.getElementById('tag-cloud');
+        const searchEl = document.getElementById('tag-search');
+        let TAGS = [];
+        let MAXN = 1;
+
+        function render(q) {
+            cloud.innerHTML = '';
+            const key = (q || '').trim().toLowerCase();
+            const list = TAGS.filter(t => t.name.toLowerCase().includes(key));
+            if (!list.length) {
+                const e = document.createElement('div');
+                e.className = 'empty';
+                e.textContent = TAGS.length ? 'Tag tidak ditemukan.' : 'Belum ada tag.';
+                cloud.appendChild(e);
+                return;
+            }
+            list.forEach(t => {
+                // makin banyak videonya, makin besar tombolnya
+                const k = MAXN > 1 ? (t.n - 1) / (MAXN - 1) : 0;
+                const a = document.createElement('a');
+                a.href = 'index.html?tag=' + encodeURIComponent(t.name);
+                a.style.fontSize = (0.85 + 0.4 * k).toFixed(2) + 'rem';
+                a.style.padding = (7 + 5 * k).toFixed(1) + 'px ' + (12 + 6 * k).toFixed(1) + 'px';
+                const ic = document.createElement('i');
+                ic.className = 'fas fa-tag';
+                const name = document.createElement('span');
+                name.textContent = t.name;
+                const n = document.createElement('span');
+                n.className = 'n';
+                n.textContent = t.n;
+                a.append(ic, name, n);
+                cloud.appendChild(a);
+            });
+        }
+
+        searchEl.addEventListener('input', e => render(e.target.value));
+
+        loadVideos().then(videos => {
+            setMenuData(videos || [], null);
+            if (videos === null) {
+                cloud.innerHTML = '<div class="empty">Gagal memuat data.</div>';
+                return;
+            }
+            const count = new Map();
+            videos.forEach(v => videoTags(v).forEach(g => {
+                const k = g.toLowerCase();
+                const cur = count.get(k) || { name: g, n: 0 };
+                cur.n++;
+                count.set(k, cur);
+            }));
+            TAGS = [...count.values()].sort((a, b) => a.name.localeCompare(b.name));
+            MAXN = TAGS.reduce((m, t) => Math.max(m, t.n), 1);
+            render('');
+        });
+    </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+        }
+    </script>
+</body>
+</html>
