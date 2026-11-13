@@ -15,6 +15,17 @@
             } catch (e) {}
         })();
     </script>
+    <script>
+        // Tampilkan halaman langsung kalau admin sudah masuk (hindari kedipan layar login)
+        (function () {
+            try {
+                var e = Number(localStorage.getItem('adm_ok') || 0);
+                if ((e && e > Date.now()) || sessionStorage.getItem('adm_ok') === '1') {
+                    document.documentElement.classList.add('unlocked');
+                }
+            } catch (err) {}
+        })();
+    </script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#ffe9f2">
     <meta name="mobile-web-app-capable" content="yes">
@@ -103,14 +114,84 @@
         html[data-theme="dark"] .suggest button { color: #f9a8d4; background: rgba(244,114,182,0.15); }
         html[data-theme="dark"] .item .tags { color: #c98aa9; }
         html[data-theme="dark"] .item button.edit { color: #f9a8d4; }
+
+        /* ===== Gerbang admin ===== */
+        html:not(.unlocked) header, html:not(.unlocked) .container { display: none !important; }
+        html.unlocked #gate { display: none; }
+        #gate { position: fixed; inset: 0; z-index: 1000; overflow-y: auto; display: flex; align-items: center; justify-content: center; padding: 20px 16px; background: #fff5f9; }
+        .gate-card { position: relative; width: 100%; max-width: 360px; background: #fff; border: 2px solid #f9a8d4; border-radius: 28px; padding: 64px 22px 22px; margin-top: 56px; text-align: center; box-shadow: 0 6px 0 #f9a8d4; }
+        .gate-logo { position: absolute; top: -58px; left: 50%; margin-left: -58px; width: 116px; height: 116px; border-radius: 50%; border: 5px solid #f9a8d4; background: #fff; object-fit: cover; box-shadow: 0 4px 0 #f472b6; animation: gate-float 3.2s ease-in-out infinite; }
+        @keyframes gate-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+        .gate-title { font-size: 1.7rem; font-weight: 900; letter-spacing: 2px; color: #f472b6; -webkit-text-stroke: 3px #000; paint-order: stroke fill; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; line-height: 1.1; }
+        .gate-sub { margin: 10px 0 18px; font-size: 0.9rem; color: #b0457a; }
+        .gate-field { position: relative; margin-bottom: 12px; text-align: left; }
+        .gate-field > i.lead { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #ec4899; font-size: 1rem; pointer-events: none; }
+        #gate .gate-input { width: 100%; padding: 14px 46px 14px 44px; border-radius: 18px; border: 2px solid #f9a8d4; background: #fff7fb; color: #5b2a45; font-size: 1rem; font-weight: 600; letter-spacing: 1px; outline: none; box-shadow: none; }
+        #gate .gate-input::placeholder { color: #d58db3; font-weight: 600; letter-spacing: 1px; }
+        #gate .gate-input:focus { border-color: #ec4899; background: #fff; }
+        .gate-eye { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border: none; background: transparent; color: #ec4899; font-size: 1rem; cursor: pointer; }
+        .gate-remember { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 4px 0 14px; font-size: 0.85rem; color: #9d174d; cursor: pointer; }
+        .gate-remember input { width: 18px; height: 18px; accent-color: #ec4899; }
+        .gate-btn { width: 100%; padding: 14px; border: 2px solid #be185d; border-radius: 18px; background: #ec4899; color: #fff; font-size: 1.05rem; font-weight: 800; letter-spacing: 1px; cursor: pointer; box-shadow: 0 5px 0 #be185d; transition: transform .08s, box-shadow .08s; }
+        .gate-btn:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 1px 0 #be185d; }
+        .gate-btn:disabled { background: #f9a8d4; border-color: #f472b6; box-shadow: 0 5px 0 #f472b6; cursor: default; }
+        .gate-msg { min-height: 1.4em; margin-top: 16px; font-size: 0.85rem; font-weight: 600; color: #e11d48; }
+        .gate-msg.ok { color: #16a34a; }
+        .gate-deco { position: absolute; color: #f472b6; font-size: 1.1rem; pointer-events: none; animation: gate-twinkle 2.4s ease-in-out infinite; }
+        @keyframes gate-twinkle { 0%, 100% { opacity: .35; transform: scale(.9); } 50% { opacity: 1; transform: scale(1.15); } }
+        .gate-card.shake { animation: gate-shake .4s; }
+        @keyframes gate-shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-9px); } 40% { transform: translateX(9px); } 60% { transform: translateX(-6px); } 80% { transform: translateX(6px); } }
+        @media (prefers-reduced-motion: reduce) { .gate-logo, .gate-deco, .gate-card.shake { animation: none; } }
+        .logout-link { color: #db2777; text-decoration: none; font-size: 0.9rem; cursor: pointer; }
+        html[data-theme="dark"] #gate { background: #170a11; }
+        html[data-theme="dark"] .gate-card { background: #2a1421; border-color: #5a2d44; box-shadow: 0 6px 0 #4a2538; }
+        html[data-theme="dark"] .gate-logo { border-color: #5a2d44; background: #2a1421; box-shadow: 0 4px 0 #4a2538; }
+        html[data-theme="dark"] .gate-sub { color: #c98aa9; }
+        html[data-theme="dark"] #gate .gate-input { background: #1c0d15; border-color: #5a2d44; color: #f6dbe8; }
+        html[data-theme="dark"] #gate .gate-input:focus { border-color: #ec4899; }
+        html[data-theme="dark"] #gate .gate-input::placeholder { color: #8f5a75; }
+        html[data-theme="dark"] .gate-remember { color: #e9a3c4; }
+        html[data-theme="dark"] .gate-msg { color: #fb7185; }
+        html[data-theme="dark"] .gate-msg.ok { color: #4ade80; }
+        html[data-theme="dark"] .logout-link { color: #f9a8d4; }
     </style>
     <link rel="stylesheet" href="solid.css">
 </head>
 <body>
 
+    <div id="gate">
+        <form class="gate-card" id="gate-form" autocomplete="on">
+            <span class="gate-deco" style="top:18px;left:18px;">&#10022;</span>
+            <span class="gate-deco" style="top:30px;right:20px;animation-delay:.6s;">&#9825;</span>
+            <span class="gate-deco" style="bottom:20px;left:22px;animation-delay:1.1s;">&#9825;</span>
+            <span class="gate-deco" style="bottom:26px;right:18px;animation-delay:1.6s;">&#10022;</span>
+
+            <img class="gate-logo" src="icon-512.png" alt="Logo DOLL18">
+            <div class="gate-title">DOLL18</div>
+            <p class="gate-sub">Khusus admin ya, masuk dulu yuk &#9825;</p>
+
+            <div class="gate-field">
+                <i class="fas fa-user lead"></i>
+                <input class="gate-input" type="text" id="gate-user" placeholder="USER" autocomplete="username" autocapitalize="characters" spellcheck="false" required>
+            </div>
+            <div class="gate-field">
+                <i class="fas fa-lock lead"></i>
+                <input class="gate-input" type="password" id="gate-pass" placeholder="PASSWORD" autocomplete="current-password" required>
+                <button type="button" class="gate-eye" id="gate-eye" aria-label="Tampilkan password"><i class="fas fa-eye"></i></button>
+            </div>
+            <label class="gate-remember"><input type="checkbox" id="gate-remember"> Ingat saya di HP ini</label>
+            <button type="submit" class="gate-btn" id="gate-btn">Masuk &#9825;</button>
+            <div class="gate-msg" id="gate-msg" role="status" aria-live="polite"></div>
+        </form>
+    </div>
+
+
     <header>
         <a href="index.html" class="logo">DOLL18</a>
-        <a href="index.html" style="color:#db2777;text-decoration:none;font-size:0.9rem;"><i class="fas fa-arrow-left"></i> Kembali</a>
+        <div style="display:flex;align-items:center;gap:16px;">
+            <a href="index.html" style="color:#db2777;text-decoration:none;font-size:0.9rem;"><i class="fas fa-arrow-left"></i> Kembali</a>
+            <a class="logout-link" id="logout" role="button"><i class="fas fa-right-from-bracket"></i> Keluar</a>
+        </div>
     </header>
 
     <div class="container">
@@ -513,6 +594,92 @@
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
         }
+    </script>
+    <script>
+        // ===== Gerbang admin =====
+        // Catatan: web ini statis, jadi gerbang ini hanya penghalang untuk pengunjung biasa.
+        // Yang benar-benar melindungi penerbitan video adalah token GitHub.
+        (function () {
+            const SALT = 'doll18-admin-40582820cca4729c';
+            const ITER = 150000;
+            const HASH = '5714a14a1205121113ba110f3d6637e9b080a56744e75ad0ac44927fb46ef817';
+            const MAX_TRY = 5, LOCK_MS = 60000, REMEMBER_MS = 30 * 24 * 3600 * 1000;
+
+            const form = document.getElementById('gate-form');
+            const card = form;
+            const userEl = document.getElementById('gate-user');
+            const passEl = document.getElementById('gate-pass');
+            const rememberEl = document.getElementById('gate-remember');
+            const btn = document.getElementById('gate-btn');
+            const msg = document.getElementById('gate-msg');
+            let tries = 0, timer = null;
+
+            function say(text, ok) { msg.textContent = text; msg.className = 'gate-msg' + (ok ? ' ok' : ''); }
+            function lockLeft() { try { return Math.max(0, Number(localStorage.getItem('adm_lock') || 0) - Date.now()); } catch (e) { return 0; } }
+
+            function tickLock() {
+                const left = lockLeft();
+                if (left <= 0) { clearInterval(timer); timer = null; btn.disabled = false; say(''); return; }
+                btn.disabled = true;
+                say('Kebanyakan salah nih \uD83E\uDD7A coba lagi ' + Math.ceil(left / 1000) + ' detik ya');
+            }
+            function startLockUI() { if (timer) clearInterval(timer); tickLock(); timer = setInterval(tickLock, 500); }
+            if (lockLeft() > 0) startLockUI();
+
+            async function derive(user, pass) {
+                const enc = new TextEncoder();
+                const key = await crypto.subtle.importKey('raw', enc.encode(user.trim().toLowerCase() + '\n' + pass), 'PBKDF2', false, ['deriveBits']);
+                const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: enc.encode(SALT), iterations: ITER }, key, 256);
+                return [...new Uint8Array(bits)].map(b => b.toString(16).padStart(2, '0')).join('');
+            }
+
+            document.getElementById('gate-eye').addEventListener('click', () => {
+                const show = passEl.type === 'password';
+                passEl.type = show ? 'text' : 'password';
+                document.querySelector('#gate-eye i').className = show ? 'fas fa-eye-slash' : 'fas fa-eye';
+            });
+
+            form.addEventListener('submit', async e => {
+                e.preventDefault();
+                if (lockLeft() > 0) return;
+                if (!(window.crypto && crypto.subtle)) {
+                    say('Browser ini tidak mendukung. Buka lewat alamat https ya.');
+                    return;
+                }
+                btn.disabled = true;
+                say('Sebentar ya... \u2728');
+                let ok = false;
+                try { ok = (await derive(userEl.value, passEl.value)) === HASH; } catch (err) { ok = false; }
+                if (ok) {
+                    try {
+                        if (rememberEl.checked) localStorage.setItem('adm_ok', String(Date.now() + REMEMBER_MS));
+                        else sessionStorage.setItem('adm_ok', '1');
+                        localStorage.removeItem('adm_lock');
+                    } catch (err) {}
+                    say('Yey, selamat datang! \u2661', true);
+                    setTimeout(() => document.documentElement.classList.add('unlocked'), 450);
+                    passEl.value = '';
+                    return;
+                }
+                tries++;
+                passEl.value = '';
+                card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
+                if (tries >= MAX_TRY) {
+                    tries = 0;
+                    try { localStorage.setItem('adm_lock', String(Date.now() + LOCK_MS)); } catch (err) {}
+                    startLockUI();
+                } else {
+                    btn.disabled = false;
+                    say('Ups, user atau password salah \uD83E\uDD7A (sisa ' + (MAX_TRY - tries) + ' kesempatan)');
+                    passEl.focus();
+                }
+            });
+
+            document.getElementById('logout').addEventListener('click', () => {
+                try { localStorage.removeItem('adm_ok'); sessionStorage.removeItem('adm_ok'); } catch (err) {}
+                location.reload();
+            });
+        })();
     </script>
 </body>
 </html>
